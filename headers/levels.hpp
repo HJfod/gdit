@@ -7,6 +7,7 @@
 #include "main.hpp"
 #include "../ext/ZlibHelper.hpp"
 #include "../ext/Base64.hpp"
+#include "../ext/json.hpp"
 
 namespace gd {
     namespace decode {
@@ -123,6 +124,25 @@ namespace gd {
             }
         }
 
+        std::string WithoutKey(const std::string DATA, std::string KEY) {
+            std::regex m ("<k>" + KEY + "</k><.>");
+            std::smatch cm;
+            std::regex_search(DATA, cm, m);
+
+            if (cm[0] == "") return "";
+
+            std::string T_TYPE = ((std::string)cm[0]).substr(((std::string)cm[0]).find_last_of("<") + 1, 1);
+
+            std::regex tm ("<k>" + KEY + "</k><" + T_TYPE + ">.*?</" + T_TYPE + ">");
+            std::smatch tcm;
+            std::regex_search(DATA, tcm, tm);
+
+            std::string VAL = tcm[0];
+
+            int L1 = ("<k>" + KEY + "</k><" + T_TYPE + ">").length();
+            return DATA.substr(0, L1) + DATA.substr(VAL.find_last_of("</") - L1 - 1);
+        }
+
         std::string GetLevel(std::string _name, std::string *_err) {
             LoadLevels();
 
@@ -138,5 +158,20 @@ namespace gd {
             
             return "";
         }
+    }
+}
+
+namespace gdit {
+    nlohmann::json GenerateGDitLevelInfo(std::string _data) {
+        std::time_t t = std::time(0);
+        std::tm now;
+        localtime_s(&now, &t);
+        std::stringstream ss;
+        ss << (now.tm_year + 1900) << '-' << (now.tm_mon + 1) << '-' << now.tm_mday << '-' << now.tm_hour << '-' << now.tm_min;
+
+        return {
+            { "name", gd::levels::GetKey(_data, "k2") },
+            { "init-time", ss.str() }
+        };
     }
 }

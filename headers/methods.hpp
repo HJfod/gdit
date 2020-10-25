@@ -4,6 +4,7 @@
 #include <locale>
 #include <codecvt>
 #include <direct.h>
+#include <fstream>
 
 namespace methods {
     std::string replace(std::string const& original, std::string const& from, std::string const& to) {
@@ -38,5 +39,12 @@ namespace methods {
         _getcwd(buff, FILENAME_MAX);
         std::string current_working_dir(buff);
         return current_working_dir;
+    }
+
+    void fsave (std::string _path, std::string _cont) {
+        std::ofstream file;
+        file.open(_path);
+        file << _cont;
+        file.close();
     }
 }

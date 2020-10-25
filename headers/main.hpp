@@ -5,9 +5,11 @@
 #include "errors.hpp"
 
 namespace ext {
-    const std::string data =        "gdit";
+    const std::string main =        "gdit";
     const std::string level =       "gditl";
+    const std::string levelinfo =   "gditi";
     const std::string leveldata =   "gditd";
+    const std::string master =      "master";
 }
 
 namespace app {

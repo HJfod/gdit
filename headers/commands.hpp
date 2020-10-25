@@ -39,14 +39,18 @@ namespace commands {
                         if (_mkdir(path.c_str()) != 0)
                             std::cout << "Couldn't initialize level! Error: " << ERR_COULD_NOT_MAKE_DIR << std::endl;
                         else {
-                            std::string fpath = path + "\\" + level_name + ".master." + ext::level;
+                            std::string fpath = path + "\\" + level_name + "-master\\" + level_name + "." + ext::master + ".";
+                            
+                            if (_mkdir((path + "\\" + level_name + "_master").c_str()) != 0)
+                                std::cout << "Couldn't initialize level! Error: " << ERR_COULD_NOT_MAKE_DIR << std::endl;
+                            else {
+                                methods::fsave(fpath + ext::leveldata, gd::levels::GetKey(lvl, "k4"));
+                                methods::fsave(fpath + ext::levelinfo, gd::levels::WithoutKey(lvl, "k4"));
+                                methods::fsave(fpath + "og." + ext::level, lvl);
+                                methods::fsave(fpath + ext::main, gdit::GenerateGDitLevelInfo(lvl).dump());
+                            }
 
-                            std::ofstream init_file;
-                            init_file.open(fpath);
-                            init_file << lvl;
-                            init_file.close();
-
-                            std::cout << "Succesfully initialized " << level << " in " << methods::workdir() << "\\" << fpath << " !" << std::endl;
+                            std::cout << "Succesfully initialized " << level << " in " << methods::workdir() << "\\" << fpath + ext::main << " !" << std::endl;
                         }
                     }
                 }
