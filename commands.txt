@@ -1,0 +1,6 @@
+init
+    %level
+        >gdit-init %level
+    --help
+        >echo Use this command to initalize a new GDit project.
+commit

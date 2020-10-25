@@ -1,0 +1,1 @@
+#define ERR_COULD_NOT_MAKE_DIR              1
