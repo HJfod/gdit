@@ -30,7 +30,7 @@ namespace commands {
                 if (lvl == "")
                     std::cout << err << std::endl;
                 else {
-                    std::string path = app::dir::main + "\\" + level_name;
+                    std::string path = app::dir::main + "\\" + methods::lower(level_name);
                     if (methods::fexists(path))
                         std::cout << "Level has already been initialized!" << std::endl;
                     else {
@@ -39,9 +39,9 @@ namespace commands {
                         if (_mkdir(path.c_str()) != 0)
                             std::cout << "Couldn't initialize level! Error: " << ERR_COULD_NOT_MAKE_DIR << std::endl;
                         else {
-                            std::string fpath = path + "\\" + level_name + "-master\\" + level_name + "." + ext::master + ".";
+                            std::string fpath = path + "\\" + methods::lower(level_name) + "-master\\" + methods::lower(level_name) + "." + ext::master + ".";
                             
-                            if (_mkdir((path + "\\" + level_name + "_master").c_str()) != 0)
+                            if (_mkdir((path + "\\" + methods::lower(level_name) + "-master").c_str()) != 0)
                                 std::cout << "Couldn't initialize level! Error: " << ERR_COULD_NOT_MAKE_DIR << std::endl;
                             else {
                                 methods::fsave(fpath + ext::leveldata, gd::levels::GetKey(lvl, "k4"));
@@ -55,12 +55,14 @@ namespace commands {
                     }
                 }
             }
-        } else if (args[0] == "distribute") {
-            if (comc < 3)
-                std::cout << "You need to provide a level name to initalize GDit in. (Replace spaces in the name with underlines!)" << std::endl;
-            else {
-                
-            }
+        } else if (args[0] == "get") {
+            std::string lvl;
+            if (comc < 3) {
+                std::cout << "Select a gdit to get the level from:" << std::endl;
+                for (std::string repo : gdit::GetAllRepos())
+                    std::cout << " * " << repo << std::endl;
+                std::cin >> lvl;
+            } else lvl = args[1];
         } else {
             std::cout << "Unknown command. Use \"./gdit.exe help\" for a list of all commands." << std::endl;
             return;

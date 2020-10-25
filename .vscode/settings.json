@@ -50,6 +50,17 @@
         "xstddef": "cpp",
         "xtr1common": "cpp",
         "xutility": "cpp",
-        "codecvt": "cpp"
+        "codecvt": "cpp",
+        "array": "cpp",
+        "clocale": "cpp",
+        "forward_list": "cpp",
+        "functional": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "numeric": "cpp",
+        "unordered_map": "cpp",
+        "valarray": "cpp",
+        "xhash": "cpp",
+        "xtree": "cpp"
     }
 }

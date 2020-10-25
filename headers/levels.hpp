@@ -174,4 +174,19 @@ namespace gdit {
             { "init-time", ss.str() }
         };
     }
+
+    std::vector<std::string> GetAllRepos() {
+        std::string pattern(app::dir::main);
+        pattern.append("\\*");
+        LPWIN32_FIND_DATAA data;
+        HANDLE hFind;
+        std::vector<std::string> res;
+        if ((hFind = FindFirstFileA((LPCSTR)pattern.c_str(), data)) != INVALID_HANDLE_VALUE) {
+            do {
+                res.push_back(data->cFileName);
+            } while (FindNextFileA(hFind, data) != 0);
+            FindClose(hFind);
+        }
+        return res;
+    }
 }
