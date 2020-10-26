@@ -68,12 +68,18 @@ namespace commands {
 
                     if (s == -1)
                         std::cout << "Cancelled selection" << std::endl;
-                    else {
-                        std::cout << gdit::GetGditLevel(res) << std::endl;
-                        std::cout << "Send this file to your collab participants! :)" << std::endl;
-                    }
+                    else
+                        lvl = res;
                 }
             } else lvl = args[1];
+
+            if (gdit::GditExists(lvl)) {
+                std::cout << gdit::GetGditLevel(lvl) << std::endl;
+                std::cout << "Send this file to your collab participants! :)" << std::endl;
+            } else std::cout << "gdit not found! Use \"gdit init <level>\" to create a gdit." << std::endl;
+        } else if (args[0].find("\\", 0) != std::string::npos || args[0].find("/", 0) != std::string::npos) {
+            if (methods::ewith(args[0], ext::level))
+                gdit::AddGditPart(args[0]);
         } else {
             std::cout << "Unknown command. Use \"./gdit.exe help\" for a list of all commands." << std::endl;
             return;

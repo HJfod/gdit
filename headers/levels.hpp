@@ -192,11 +192,28 @@ namespace gdit {
         return cont;
     }
 
+    bool GditExists(std::string _name) {
+        return methods::fexists(app::dir::main + "\\" + _name + "\\master") ||
+               methods::fexists(app::dir::main + "\\" + _name + "\\parts");
+    }
+
     std::string GetGditLevel(std::string _name) {
         std::string to = methods::workdir() + "\\" + app::dir::copies + "\\" + _name + ".copy." + ext::level;
         methods::fcopy(
             app::dir::main + "\\" + _name + "\\master\\" + _name + ".master.og." + ext::level, to
         );
         return to;
+    }
+    
+    std::string GetGDitNameFromPath(std::string _path) {
+        _path = methods::replace(_path, "/", "\\");
+        std::string sh = _path.substr(_path.find_last_of("\\", _path.length()) + 1);
+        return sh.substr(0, sh.find_first_of(".", 0));
+    }
+
+    void AddGditPart(std::string _path) {
+        if (GditExists(GetGDitNameFromPath(_path))) {
+            std::cout << "yeet";
+        }
     }
 }
