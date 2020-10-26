@@ -2,7 +2,6 @@
 #include <vector>
 #include <direct.h>
 #include "methods.hpp"
-#include "errors.hpp"
 
 namespace ext {
     const std::string main =        "gdit";
@@ -15,10 +14,13 @@ namespace ext {
 namespace app {
     namespace dir {
         const std::string main = "gdit";
+        const std::string copies = "copies";
 
         void init() {
             if (!methods::fexists(app::dir::main))
                 _mkdir(app::dir::main.c_str());
+            if (!methods::fexists(app::dir::copies))
+                _mkdir(app::dir::copies.c_str());
         }
     }
     std::string decoded_data;

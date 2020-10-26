@@ -8,6 +8,7 @@
 #include "../ext/ZlibHelper.hpp"
 #include "../ext/Base64.hpp"
 #include "../ext/json.hpp"
+#include "../ext/dirent.h"
 
 namespace gd {
     namespace decode {
@@ -176,17 +177,26 @@ namespace gdit {
     }
 
     std::vector<std::string> GetAllRepos() {
-        std::string pattern(app::dir::main);
-        pattern.append("\\*");
-        LPWIN32_FIND_DATAA data;
-        HANDLE hFind;
-        std::vector<std::string> res;
-        if ((hFind = FindFirstFileA((LPCSTR)pattern.c_str(), data)) != INVALID_HANDLE_VALUE) {
-            do {
-                res.push_back(data->cFileName);
-            } while (FindNextFileA(hFind, data) != 0);
-            FindClose(hFind);
-        }
-        return res;
+        struct dirent *entry;
+        DIR *dir = opendir(app::dir::main.c_str());
+
+        std::vector<std::string> cont;
+        while ((entry = readdir(dir)) != NULL)
+            if (entry->d_type == DT_DIR)
+                if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+                    if (methods::fexists(app::dir::main + "\\" + entry->d_name + "\\master"))
+                        cont.push_back(entry->d_name);
+
+        closedir(dir);
+
+        return cont;
+    }
+
+    std::string GetGditLevel(std::string _name) {
+        std::string to = methods::workdir() + "\\" + app::dir::copies + "\\" + _name + ".copy." + ext::level;
+        methods::fcopy(
+            app::dir::main + "\\" + _name + "\\master\\" + _name + ".master.og." + ext::level, to
+        );
+        return to;
     }
 }

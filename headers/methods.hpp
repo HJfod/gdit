@@ -5,6 +5,8 @@
 #include <codecvt>
 #include <direct.h>
 #include <fstream>
+#include <conio.h>
+#include "errors.hpp"
 
 namespace methods {
     std::string replace(std::string const& original, std::string const& from, std::string const& to) {
@@ -46,5 +48,73 @@ namespace methods {
         file.open(_path);
         file << _cont;
         file.close();
+    }
+
+    int fcopy(std::string from, std::string to) {
+        if (!fexists(from))
+            return GDIT_COPY_FROM_DOESNT_EXIST;
+        std::ifstream src(from, std::ios::binary);
+        std::ofstream dst(to,   std::ios::binary);
+        dst << src.rdbuf();
+
+        return GDIT_COPY_SUCCESS;
+    }
+}
+
+namespace console {
+    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD CursorPosition;
+
+    void gotoXY(int _x, int _y) {
+        CursorPosition.X = _x;
+        CursorPosition.Y = _y;
+        SetConsoleCursorPosition(console, CursorPosition);
+    };
+
+    int selectmenu (std::vector<std::string> options, std::string *ret) {
+        std::cout << "[Use arrow keys to navigate, space / enter to select]" << std::endl;
+
+        for (std::string option : options)
+            std::cout << " * " << option << std::endl;
+        
+        CONSOLE_SCREEN_BUFFER_INFO cbsi;
+        GetConsoleScreenBufferInfo(console, &cbsi);
+            
+        bool selected = false;
+        int last = 0;
+        int selin = 0;
+        while (!selected) {
+            gotoXY(cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y - options.size() + last);
+            std::cout << " * ";
+            gotoXY(cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y - options.size() + selin);
+            std::cout << " > ";
+            last = selin;
+            gotoXY(cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y);
+
+            switch (_getch()) {
+                case '\r': case ' ':
+                    selected = true;
+                    break;
+                case 27:
+                    selected = true;
+                    selin = -1;
+                    break;
+                case 0: case 224:
+                    switch (_getch()) {
+                        case 72: case 75:
+                            selin--;
+                            if (selin < 0) selin = options.size() - 1;
+                            break;
+                        case 80: case 77:
+                            selin++;
+                            if (selin > options.size() - 1) selin = 0;
+                            break;
+                    }
+                    break;
+            }
+        }
+        if (selin >= 0)
+            *ret = options[selin];
+        return selin;
     }
 }

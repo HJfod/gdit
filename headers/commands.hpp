@@ -37,12 +37,12 @@ namespace commands {
                         std::cout << "Initializing..." << std::endl;
 
                         if (_mkdir(path.c_str()) != 0)
-                            std::cout << "Couldn't initialize level! Error: " << ERR_COULD_NOT_MAKE_DIR << std::endl;
+                            std::cout << "Couldn't initialize level! Error: " << GDIT_COULD_NOT_MAKE_DIR << std::endl;
                         else {
-                            std::string fpath = path + "\\" + methods::lower(level_name) + "-master\\" + methods::lower(level_name) + "." + ext::master + ".";
+                            std::string fpath = path + "\\" + "master\\" + methods::lower(level_name) + "." + ext::master + ".";
                             
-                            if (_mkdir((path + "\\" + methods::lower(level_name) + "-master").c_str()) != 0)
-                                std::cout << "Couldn't initialize level! Error: " << ERR_COULD_NOT_MAKE_DIR << std::endl;
+                            if (_mkdir((path + "\\" + "master").c_str()) != 0)
+                                std::cout << "Couldn't initialize level! Error: " << GDIT_COULD_NOT_MAKE_DIR << std::endl;
                             else {
                                 methods::fsave(fpath + ext::leveldata, gd::levels::GetKey(lvl, "k4"));
                                 methods::fsave(fpath + ext::levelinfo, gd::levels::WithoutKey(lvl, "k4"));
@@ -58,10 +58,21 @@ namespace commands {
         } else if (args[0] == "get") {
             std::string lvl;
             if (comc < 3) {
-                std::cout << "Select a gdit to get the level from:" << std::endl;
-                for (std::string repo : gdit::GetAllRepos())
-                    std::cout << " * " << repo << std::endl;
-                std::cin >> lvl;
+                std::vector<std::string> repos = gdit::GetAllRepos();
+                if (repos.size() == 0)
+                    std::cout << "You have no gdits! Use \"gdit init <level>\" to start a new gdit." << std::endl;
+                else {
+                    std::cout << "Select a gdit to get the level from:" << std::endl;
+                    std::string res;
+                    int s = console::selectmenu(repos, &res);
+
+                    if (s == -1)
+                        std::cout << "Cancelled selection" << std::endl;
+                    else {
+                        std::cout << gdit::GetGditLevel(res) << std::endl;
+                        std::cout << "Send this file to your collab participants! :)" << std::endl;
+                    }
+                }
             } else lvl = args[1];
         } else {
             std::cout << "Unknown command. Use \"./gdit.exe help\" for a list of all commands." << std::endl;
