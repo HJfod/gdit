@@ -1,6 +1,18 @@
-init
-    %level
-        >gdit-init %level
-    --help
-        >echo Use this command to initalize a new GDit project.
-commit
+!! finished !!
+
+init <level>
+    Initializes a new gdit from the level.
+get [<gdit>]
+    Get the base layout from a gdit.
+
+!! wip !!
+
+<path-to-gditl-file>
+    Import the gdit level as a new part and start working on it.
+
+!! not yet implemented !!
+
+commit <gdit> [<part>]
+    Commit your local changes to part(s).
+pull <gdit> <part1> [<part2> <part3> ...]
+    Get a copy of the master layout with these parts merged on it.
