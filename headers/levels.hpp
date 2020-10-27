@@ -9,6 +9,7 @@
 #include "../ext/Base64.hpp"
 #include "../ext/json.hpp"
 #include "../ext/dirent.h"
+#include "../ext/regex_add.h"
 
 namespace gd {
     namespace decode {
@@ -125,6 +126,17 @@ namespace gd {
             }
         }
 
+        std::string SetKey(std::string *_data, std::string _key, std::string _val) {
+            int p = _data->find("<k>" + _key + "</k>") - 7 - _key.length();
+
+            std::string m = _data->substr(_data->find("<k>" + _key + "</k>") + 7 + _key.length());
+            std::string t = m.substr(1, 1);
+            std::string r = "<k>" + _key + "</k><" + t + ">" + _val + "</" + t + ">";
+
+            *_data = std::regex_replace(*_data, std::regex(R"(<k>)" + _key + R"(<\/k><.>.*?<\/.>)"), r, std::regex_constants::match_any);
+            return r;
+        }
+
         std::string WithoutKey(const std::string DATA, std::string KEY) {
             std::regex m ("<k>" + KEY + "</k><.>");
             std::smatch cm;
@@ -160,22 +172,40 @@ namespace gd {
             return "";
         }
 
-        int ImportLevel(std::string _path) {
+        int ImportLevel(std::string _path, std::string _lvl = "", std::string _name = "") {
+            std::string lvl;
+            if (_lvl == "")
+                lvl = methods::fread(_path);
+            else lvl = _lvl;
+
             std::string data = decode::GetCCLocalLevels();
 
             data = std::regex_replace(data, std::regex (R"P(<k>k1<\/k><i>\d+?<\/i>)P"), "",
             std::regex_constants::match_any);
-            std::vector<std::string> split = methods::split(data, "<k>_isArr</k><t />");
-            split[1] = std::regex_replace(split[1], std::regex (R"P(<k>k_(\d+)<\/k><d><k>kCEK<\/k>)P"), 
-            );
+            std::string first_half = data.substr(0, data.find("<k>_isArr</k><t />"));
+            std::string second_half = data.substr(data.find("<k>_isArr</k><t />") + 18);
+            std::string true_second_half = "";
+            std::string work = second_half;
+            while (work.length() > 0) { 
+                if (work.find("<k>k_") == std::string::npos)
+                    work = "";
+                else {
+                    std::cout << "debug0";
+                    int x = std::stoi(work.substr(work.find_first_of("<k>k_") + 5, work.find_first_of("</k><d>"))) + 1;
+                    std::cout << "debug0";
+                    std::string r = "<k>k_" + std::to_string(x) + "</k><d>" + work.substr(work.find_first_of("</k><d>") + 7);
+                    true_second_half += r;
+                    work = work.substr(r.length());
+                }
+            }
+            if (_name != "")
+                SetKey(&lvl, "k2", _name);
+            data = first_half + "<k>_isArr</k><t /><k>k_0</k>" + lvl + true_second_half;
 
-            /*
-            data = Regex.Replace(data, @"<k>k1<\/k><i>\d+?<\/i>", "");
-            string[] splitData = data.Split("<k>_isArr</k><t />");
-            splitData[1] = Regex.Replace(splitData[1], @"<k>k_(\d+)<\/k><d><k>kCEK<\/k>",
-            m => $"<k>k_{(Int32.Parse((Regex.Match(m.Value, @"k_\d+").Value.Substring(2))) + 1)}</k><d><k>kCEK</k>");
-            data = splitData[0] + "<k>_isArr</k><t /><k>k_0</k>" + lvl + splitData[1];
-            */
+            std::cout << decode::GetCCPath("LocalLevels") << std::endl;
+            methods::fsave(decode::GetCCPath("LocalLevels"), data);
+
+            return GDIT_IMPORT_SUCCESS;
         }
     }
 }
@@ -265,17 +295,17 @@ namespace gdit {
         
         tp = tp == "" ? rpath : tp;
 
-        if (_mkdir((tp + "\\" + "\\part_" + _creator).c_str()) != 0)
-            return GDIT_COULD_NOT_MAKE_DIR;
-        else {
-            methods::fcopy(
-                _path, tp + "\\part_" + _creator + "\\" + name + ".og." + ext::level
-            );
-            methods::fcopy(
-                _path, tp + "\\part_" + _creator + "\\" + name + ".work." + ext::level
-            );
-            // TODO: actually import the part in gd
-            return GDIT_IMPORT_SUCCESS;
-        }
+        if (!methods::fexists(tp + "\\part_" + _creator))
+            if (_mkdir((tp + "\\part_" + _creator).c_str()) != 0)
+                return GDIT_COULD_NOT_MAKE_DIR;
+        
+        methods::fcopy(
+            _path, tp + "\\part_" + _creator + "\\" + name + ".og." + ext::level
+        );
+        methods::fcopy(
+            _path, tp + "\\part_" + _creator + "\\" + name + ".work." + ext::level
+        );
+        gd::levels::ImportLevel(_path, "", gdname);
+        return GDIT_IMPORT_SUCCESS;
     }
 }
