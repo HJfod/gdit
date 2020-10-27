@@ -89,6 +89,18 @@ namespace methods {
             ret = ret.substr(0, ret.length() - 1);
         return ret;
     }
+
+    std::vector<std::string> split (std::string _str, std::string _split) {
+        size_t pos = 0;
+        std::string token;
+        std::vector<std::string> res = {};
+        while ((pos = _str.find(_split)) != std::string::npos) {
+            token = _str.substr(0, pos);
+            res.push_back(token);
+            _str.erase(0, pos + _split.length());
+        }
+        return res;
+    }
 }
 
 namespace console {

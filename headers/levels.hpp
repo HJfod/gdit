@@ -159,6 +159,24 @@ namespace gd {
             
             return "";
         }
+
+        int ImportLevel(std::string _path) {
+            std::string data = decode::GetCCLocalLevels();
+
+            data = std::regex_replace(data, std::regex (R"P(<k>k1<\/k><i>\d+?<\/i>)P"), "",
+            std::regex_constants::match_any);
+            std::vector<std::string> split = methods::split(data, "<k>_isArr</k><t />");
+            split[1] = std::regex_replace(split[1], std::regex (R"P(<k>k_(\d+)<\/k><d><k>kCEK<\/k>)P"), 
+            );
+
+            /*
+            data = Regex.Replace(data, @"<k>k1<\/k><i>\d+?<\/i>", "");
+            string[] splitData = data.Split("<k>_isArr</k><t />");
+            splitData[1] = Regex.Replace(splitData[1], @"<k>k_(\d+)<\/k><d><k>kCEK<\/k>",
+            m => $"<k>k_{(Int32.Parse((Regex.Match(m.Value, @"k_\d+").Value.Substring(2))) + 1)}</k><d><k>kCEK</k>");
+            data = splitData[0] + "<k>_isArr</k><t /><k>k_0</k>" + lvl + splitData[1];
+            */
+        }
     }
 }
 
