@@ -176,6 +176,40 @@ namespace gdit {
         };
     }
 
+    int InitGdit(std::string _name, std::string _lvl, std::string *_rpath, bool nomaster = false) {
+        std::string path = app::dir::main + "\\" + methods::lower(_name);
+        if (_mkdir(path.c_str()) != 0)
+            return GDIT_COULD_NOT_MAKE_DIR;
+        else {
+            std::string fpath = path + "\\" + "master\\" + methods::lower(_name) + "." + ext::master + ".";
+            
+            if (!nomaster)
+                if (_mkdir((path + "\\" + "master").c_str()) != 0)
+                    return GDIT_COULD_NOT_MAKE_DIR;
+                else {
+                    methods::fsave(fpath + ext::leveldata, gd::levels::GetKey(_lvl, "k4"));
+                    methods::fsave(fpath + ext::levelinfo, gd::levels::WithoutKey(_lvl, "k4"));
+                    methods::fsave(fpath + "og." + ext::level, _lvl);
+                    methods::fsave(fpath + ext::main, gdit::GenerateGDitLevelInfo(_lvl).dump());
+                }
+            else {
+                if (_mkdir((path + "\\" + "parts").c_str()) != 0)
+                    return GDIT_COULD_NOT_MAKE_DIR;
+                else {
+                    if (_mkdir((path + "\\" + "parts").c_str()) != 0)
+                        return GDIT_COULD_NOT_MAKE_DIR;
+                    else {
+                        
+                    }
+                }
+            }
+
+            *_rpath = fpath;
+
+            return GDIT_INIT_SUCCESS;
+        }
+    }
+
     std::vector<std::string> GetAllRepos() {
         struct dirent *entry;
         DIR *dir = opendir(app::dir::main.c_str());
@@ -211,9 +245,16 @@ namespace gdit {
         return sh.substr(0, sh.find_first_of(".", 0));
     }
 
-    void AddGditPart(std::string _path) {
-        if (GditExists(GetGDitNameFromPath(_path))) {
-            std::cout << "yeet";
-        }
+    void AddGditPart(std::string _path, std::string _creator) {
+        std::cout << "ok" << std::endl;
+        return;
+
+        std::string name = GetGDitNameFromPath(_path);
+        std::string tp;
+        std::string rpath;
+
+        if (GditExists(name))
+            tp = app::dir::main + "\\" + name;
+        else InitGdit(name, methods::fread(_path), &rpath, true);
     }
 }

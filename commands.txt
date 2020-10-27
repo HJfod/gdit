@@ -1,9 +1,13 @@
 !! finished !!
 
+template option <variable> [optional]
+
 init <level>
     Initializes a new gdit from the level.
 get [<gdit>]
     Get the base layout from a gdit.
+setup <setting> [<value>]
+    Get/set the value of a setting.
 
 !! wip !!
 

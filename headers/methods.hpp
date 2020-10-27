@@ -50,6 +50,19 @@ namespace methods {
         file.close();
     }
 
+    std::string fread (std::string _path) {
+        std::ifstream in(_path, std::ios::in | std::ios::binary);
+        if (in) {
+            std::string contents;
+            in.seekg(0, std::ios::end);
+            contents.resize(in.tellg());
+            in.seekg(0, std::ios::beg);
+            in.read(&contents[0], contents.size());
+            in.close();
+            return(contents);
+        } throw(errno);
+    }
+
     int fcopy(std::string from, std::string to) {
         if (!fexists(from))
             return GDIT_COPY_FROM_DOESNT_EXIST;
@@ -66,6 +79,15 @@ namespace methods {
         } else {
             return false;
         }
+    }
+
+    std::string sanitize (std::string _str) {
+        std::string ret = _str;
+        while (ret._Starts_with("\""))
+            ret = ret.substr(1);
+        while (ewith(ret, "\""))
+            ret = ret.substr(0, ret.length() - 1);
+        return ret;
     }
 }
 

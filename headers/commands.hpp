@@ -36,22 +36,12 @@ namespace commands {
                     else {
                         std::cout << "Initializing..." << std::endl;
 
-                        if (_mkdir(path.c_str()) != 0)
-                            std::cout << "Couldn't initialize level! Error: " << GDIT_COULD_NOT_MAKE_DIR << std::endl;
-                        else {
-                            std::string fpath = path + "\\" + "master\\" + methods::lower(level_name) + "." + ext::master + ".";
-                            
-                            if (_mkdir((path + "\\" + "master").c_str()) != 0)
-                                std::cout << "Couldn't initialize level! Error: " << GDIT_COULD_NOT_MAKE_DIR << std::endl;
-                            else {
-                                methods::fsave(fpath + ext::leveldata, gd::levels::GetKey(lvl, "k4"));
-                                methods::fsave(fpath + ext::levelinfo, gd::levels::WithoutKey(lvl, "k4"));
-                                methods::fsave(fpath + "og." + ext::level, lvl);
-                                methods::fsave(fpath + ext::main, gdit::GenerateGDitLevelInfo(lvl).dump());
-                            }
-
+                        std::string fpath;
+                        int er = gdit::InitGdit(level_name, lvl, &fpath);
+                        if (er != GDIT_INIT_SUCCESS)
+                            std::cout << "Couldn't initialize level! Error: " << er << std::endl;
+                        else
                             std::cout << "Succesfully initialized " << level << " in " << methods::workdir() << "\\" << fpath + ext::main << " !" << std::endl;
-                        }
                     }
                 }
             }
@@ -78,8 +68,24 @@ namespace commands {
                 std::cout << "Send this file to your collab participants! :)" << std::endl;
             } else std::cout << "gdit not found! Use \"gdit init <level>\" to create a gdit." << std::endl;
         } else if (args[0].find("\\", 0) != std::string::npos || args[0].find("/", 0) != std::string::npos) {
-            if (methods::ewith(args[0], ext::level))
-                gdit::AddGditPart(args[0]);
+            if (methods::ewith(args[0], ext::level)) {
+                if (app::settings::sval("username") == "") {
+                    std::cout << "What's your GD name? (no spaces): ";
+                    std::string u;
+                    std::cin >> u;
+                    app::settings::sset("username", u);
+                }
+                gdit::AddGditPart(args[0], app::settings::sval("username"));
+            }
+        } else if (args[0] == "setup") {
+            if (comc < 3)
+                std::cout << "Usage: setup <variable> [<value>]" << std::endl << "Variables:\n" << app::settings::all();
+            else if (comc == 3)
+                std::cout << app::settings::sval(args[1]) << std::endl;
+            else
+                if (app::settings::sset(args[1], args[2]) != GDIT_SETTING_UPDATE_SUCCESS)
+                    std::cout << "Unable to update setting!" << std::endl;
+                else std::cout << "Succesfully updated setting!" << std::endl;
         } else {
             std::cout << "Unknown command. Use \"./gdit.exe help\" for a list of all commands." << std::endl;
             return;
