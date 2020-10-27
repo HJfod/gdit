@@ -4,3 +4,4 @@
 #define GDIT_INIT_SUCCESS                   5
 #define GDIT_SETTING_UPDATE_SUCCESS         20
 #define GDIT_SETTING_DOESNT_EXIST           21
+#define GDIT_IMPORT_SUCCESS                 22

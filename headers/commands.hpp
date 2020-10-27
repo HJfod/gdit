@@ -75,7 +75,10 @@ namespace commands {
                     std::cin >> u;
                     app::settings::sset("username", u);
                 }
-                gdit::AddGditPart(args[0], app::settings::sval("username"));
+                int x = gdit::AddGditPart(args[0], app::settings::sval("username"));
+                if (x == GDIT_IMPORT_SUCCESS)
+                    std::cout << "Succesfully imported part!" << std::endl;
+                else std::cout << "Error: " << x << std::endl;
             }
         } else if (args[0] == "setup") {
             if (comc < 3)

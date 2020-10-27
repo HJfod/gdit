@@ -191,20 +191,10 @@ namespace gdit {
                     methods::fsave(fpath + ext::levelinfo, gd::levels::WithoutKey(_lvl, "k4"));
                     methods::fsave(fpath + "og." + ext::level, _lvl);
                     methods::fsave(fpath + ext::main, gdit::GenerateGDitLevelInfo(_lvl).dump());
-                }
-            else {
-                if (_mkdir((path + "\\" + "parts").c_str()) != 0)
-                    return GDIT_COULD_NOT_MAKE_DIR;
-                else {
-                    if (_mkdir((path + "\\" + "parts").c_str()) != 0)
-                        return GDIT_COULD_NOT_MAKE_DIR;
-                    else {
-                        
-                    }
-                }
-            }
 
-            *_rpath = fpath;
+                    *_rpath = fpath;
+                }
+            else *_rpath = path;
 
             return GDIT_INIT_SUCCESS;
         }
@@ -245,16 +235,29 @@ namespace gdit {
         return sh.substr(0, sh.find_first_of(".", 0));
     }
 
-    void AddGditPart(std::string _path, std::string _creator) {
-        std::cout << "ok" << std::endl;
-        return;
-
+    int AddGditPart(std::string _path, std::string _creator) {
         std::string name = GetGDitNameFromPath(_path);
-        std::string tp;
+        std::string tp = "";
         std::string rpath;
+        std::string gdname = "part@" + name;
 
         if (GditExists(name))
             tp = app::dir::main + "\\" + name;
         else InitGdit(name, methods::fread(_path), &rpath, true);
+        
+        tp = tp == "" ? rpath : tp;
+
+        if (_mkdir((tp + "\\" + "\\part_" + _creator).c_str()) != 0)
+            return GDIT_COULD_NOT_MAKE_DIR;
+        else {
+            methods::fcopy(
+                _path, tp + "\\part_" + _creator + "\\" + name + ".og." + ext::level
+            );
+            methods::fcopy(
+                _path, tp + "\\part_" + _creator + "\\" + name + ".work." + ext::level
+            );
+            // TODO: actually import the part in gd
+            return GDIT_IMPORT_SUCCESS;
+        }
     }
 }
