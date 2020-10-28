@@ -163,7 +163,7 @@ namespace console {
     }
 
     void loadbar (std::string txt, bool *end) {
-        std::cout << '- ' << txt << std::flush;
+        std::cout << "- " << txt << std::flush;
         while (!end) {
             using namespace std::literals::chrono_literals;
 
@@ -179,7 +179,8 @@ namespace console {
     }
 
     void showload (std::string txt, bool *end) {
+        std::cout << "ye1";
         std::thread l(loadbar, txt, end);
-        l.join();
+        std::cout << "ye2";
     }
 }

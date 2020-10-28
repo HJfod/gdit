@@ -76,7 +76,9 @@ namespace commands {
                     app::settings::sset("username", u);
                 }
                 bool endan = false;
+                std::cout << "ye0";
                 console::showload("Importing...", &endan);
+                std::cout << "ye3";
                 int x = gdit::AddGditPart(args[0], app::settings::sval("username"));
                 endan = true;
                 if (x == GDIT_IMPORT_SUCCESS)
