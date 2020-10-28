@@ -34,10 +34,15 @@ namespace commands {
                     if (methods::fexists(path))
                         std::cout << "Level has already been initialized!" << std::endl;
                     else {
-                        std::cout << "Initializing..." << std::endl;
+                        bool endan = false;
+                        std::thread l = console::showload("Initializing...", &endan);
 
                         std::string fpath;
                         int er = gdit::InitGdit(level_name, lvl, &fpath);
+                        
+                        endan = true;
+                        l.join();
+
                         if (er != GDIT_INIT_SUCCESS)
                             std::cout << "Couldn't initialize level! Error: " << er << std::endl;
                         else
@@ -76,13 +81,12 @@ namespace commands {
                     app::settings::sset("username", u);
                 }
                 bool endan = false;
-                std::cout << "ye0";
-                console::showload("Importing...", &endan);
-                std::cout << "ye3";
+                std::thread l = console::showload("Importing...", &endan);
                 int x = gdit::AddGditPart(args[0], app::settings::sval("username"));
                 endan = true;
+                l.join();
                 if (x == GDIT_IMPORT_SUCCESS)
-                    std::cout << "Succesfully imported part!" << std::endl;
+                    std::cout << "Succesfully imported part! You can now start working on it :)" << std::endl << "NOTE: DO *NOT* CHANGE THE NAME OF THE LEVEL." << std::endl;
                 else std::cout << "Error: " << x << std::endl;
             }
         } else if (args[0] == "setup") {

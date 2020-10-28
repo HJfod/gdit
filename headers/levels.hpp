@@ -305,6 +305,9 @@ namespace gdit {
         methods::fcopy(
             _path, tp + "\\part_" + _creator + "\\" + name + ".work." + ext::level
         );
+        methods::fsave(tp + "\\part_" + _creator + "\\" + name + "." + ext::main, nlohmann::json({
+            { "name", gdname }
+        }).dump());
         gd::levels::ImportLevel(_path, "", gdname);
         return GDIT_IMPORT_SUCCESS;
     }

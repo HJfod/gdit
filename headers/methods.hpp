@@ -103,6 +103,10 @@ namespace methods {
         }
         return res;
     }
+
+    std::wstring conv (std::string _str) {
+        return std::wstring(_str.begin(), _str.end());
+    }
 }
 
 namespace console {
@@ -162,25 +166,22 @@ namespace console {
         return selin;
     }
 
-    void loadbar (std::string txt, bool *end) {
-        std::cout << "- " << txt << std::flush;
-        while (!end) {
-            using namespace std::literals::chrono_literals;
-
-            std::this_thread::sleep_for(1s);
-            std::cout << "\b\\ " << txt << std::flush;
-            std::this_thread::sleep_for(1s);
-            std::cout << "\b| " << txt << std::flush;
-            std::this_thread::sleep_for(1s);
-            std::cout << "\b/ " << txt << std::flush;
-            std::this_thread::sleep_for(1s);
-            std::cout << "\b- " << txt << std::flush;
+    void loadbar (std::string _txt, bool *_end) {
+        std::chrono::milliseconds s = std::chrono::milliseconds(200);
+        while (!*_end) {
+            std::cout << "\r/ "  << _txt;
+            std::this_thread::sleep_for(s);
+            std::cout << "\r- "  << _txt;
+            std::this_thread::sleep_for(s);
+            std::cout << "\r\\ " << _txt;
+            std::this_thread::sleep_for(s);
+            std::cout << "\r| "  << _txt;
+            std::this_thread::sleep_for(s);
         }
+        std::wcout << "\r* " << methods::conv(_txt) << std::endl;
     }
 
-    void showload (std::string txt, bool *end) {
-        std::cout << "ye1";
-        std::thread l(loadbar, txt, end);
-        std::cout << "ye2";
+    std::thread showload (std::string txt, bool *end) {
+        return std::thread(loadbar, txt, end);
     }
 }
