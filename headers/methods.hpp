@@ -5,6 +5,8 @@
 #include <codecvt>
 #include <direct.h>
 #include <fstream>
+#include <chrono>
+#include <thread>
 #include <conio.h>
 #include "errors.hpp"
 
@@ -158,5 +160,26 @@ namespace console {
         if (selin >= 0)
             *ret = options[selin];
         return selin;
+    }
+
+    void loadbar (std::string txt, bool *end) {
+        std::cout << '- ' << txt << std::flush;
+        while (!end) {
+            using namespace std::literals::chrono_literals;
+
+            std::this_thread::sleep_for(1s);
+            std::cout << "\b\\ " << txt << std::flush;
+            std::this_thread::sleep_for(1s);
+            std::cout << "\b| " << txt << std::flush;
+            std::this_thread::sleep_for(1s);
+            std::cout << "\b/ " << txt << std::flush;
+            std::this_thread::sleep_for(1s);
+            std::cout << "\b- " << txt << std::flush;
+        }
+    }
+
+    void showload (std::string txt, bool *end) {
+        std::thread l(loadbar, txt, end);
+        l.join();
     }
 }

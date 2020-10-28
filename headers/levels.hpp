@@ -9,7 +9,6 @@
 #include "../ext/Base64.hpp"
 #include "../ext/json.hpp"
 #include "../ext/dirent.h"
-#include "../ext/regex_add.h"
 
 namespace gd {
     namespace decode {
@@ -61,6 +60,12 @@ namespace gd {
         std::string DecodeCCLocalLevels() {
             std::string CCPATH = decode::GetCCPath("LocalLevels");
             std::vector<uint8_t> CCCONTENTS = decode::readf(CCPATH);
+
+            std::string c = methods::fread(CCPATH);
+            if (c._Starts_with("<?xml version=\"1.0\"?>")) {
+                app::decoded_data = c;
+                return c;
+            }
 
             DecodeXOR(CCCONTENTS, 11);
             auto XOR = std::string(CCCONTENTS.begin(), CCCONTENTS.end());
@@ -184,25 +189,20 @@ namespace gd {
             std::regex_constants::match_any);
             std::string first_half = data.substr(0, data.find("<k>_isArr</k><t />"));
             std::string second_half = data.substr(data.find("<k>_isArr</k><t />") + 18);
-            std::string true_second_half = "";
             std::string work = second_half;
-            while (work.length() > 0) { 
-                if (work.find("<k>k_") == std::string::npos)
-                    work = "";
-                else {
-                    std::cout << "debug0";
-                    int x = std::stoi(work.substr(work.find_first_of("<k>k_") + 5, work.find_first_of("</k><d>"))) + 1;
-                    std::cout << "debug0";
-                    std::string r = "<k>k_" + std::to_string(x) + "</k><d>" + work.substr(work.find_first_of("</k><d>") + 7);
-                    true_second_half += r;
-                    work = work.substr(r.length());
-                }
+            std::smatch sm;
+            while (std::regex_search(work, sm, std::regex ("<k>k_[0-9]+<\\/k>.*?<\\/d>.*?<\\/d>"))) {
+                std::string m = sm[0];
+                int i = std::stoi(m.substr(5, m.find("</") - 5)) + 1;
+                std::string n = std::regex_replace((std::string)sm[0], std::regex("[0-9]+"), std::to_string(i),
+                std::regex_constants::format_first_only);
+                second_half = methods::replace(second_half, m, n);
+
+                work = work.substr(sm[0].length());
             }
             if (_name != "")
                 SetKey(&lvl, "k2", _name);
-            data = first_half + "<k>_isArr</k><t /><k>k_0</k>" + lvl + true_second_half;
-
-            std::cout << decode::GetCCPath("LocalLevels") << std::endl;
+            data = first_half + "<k>_isArr</k><t /><k>k_0</k>" + lvl.substr(lvl.find("<d>")) + second_half;
             methods::fsave(decode::GetCCPath("LocalLevels"), data);
 
             return GDIT_IMPORT_SUCCESS;
@@ -287,7 +287,7 @@ namespace gdit {
         std::string name = GetGDitNameFromPath(_path);
         std::string tp = "";
         std::string rpath;
-        std::string gdname = "part@" + name;
+        std::string gdname = name + "@" + _creator;
 
         if (GditExists(name))
             tp = app::dir::main + "\\" + name;
