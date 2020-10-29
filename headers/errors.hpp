@@ -8,3 +8,4 @@
 
 #define GDIT_TYPE_PART                      100
 #define GDIT_TYPE_GDIT                      101
+#define GDIT_NULL                           418

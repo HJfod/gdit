@@ -248,37 +248,18 @@ namespace gdit {
         }
     }
 
-    bool VerifyDirIsRepo(std::string _dir, int _type = GDIT_TYPE_GDIT) {
+    bool VerifyDirHasParts (std::string f, int n) {
+        return f.substr(f.find_last_of("\\") + 1)._Starts_with("part_");
+    }
+
+    bool VerifyDirIsRepo(std::string _dir, int _type) {
         if (_type == GDIT_TYPE_GDIT)
             return methods::fexists(_dir + "\\master");
-        
-        struct dirent *entry;
-        DIR *dir = opendir(_dir.c_str());
-
-        while ((entry = readdir(dir)) != NULL)
-            if (entry->d_type == DT_DIR)
-                if (((std::string)entry->d_name)._Starts_with("part_")) {
-                    closedir (dir);
-                    return true;
-                }
-        closedir(dir);
-
-        return false;
+        return methods::dread(_dir, &VerifyDirHasParts).size() > 0;
     }
 
     std::vector<std::string> GetAllRepos(int _type = GDIT_TYPE_GDIT) {
-        struct dirent *entry;
-        DIR *dir = opendir(app::dir::main.c_str());
-
-        std::vector<std::string> cont;
-        while ((entry = readdir(dir)) != NULL)
-            if (entry->d_type == DT_DIR)
-                if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
-                    if (VerifyDirIsRepo(app::dir::main + "\\" + entry->d_name, _type))
-                        cont.push_back(entry->d_name);
-        closedir(dir);
-
-        return cont;
+        return methods::dread(app::dir::main.c_str(), &VerifyDirIsRepo, _type);
     }
 
     bool GditExists(std::string _name) {

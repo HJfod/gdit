@@ -9,6 +9,7 @@
 #include <thread>
 #include <conio.h>
 #include "errors.hpp"
+#include "../ext/dirent.h"
 
 namespace methods {
     std::string replace(std::string const& original, std::string const& from, std::string const& to) {
@@ -107,6 +108,21 @@ namespace methods {
     std::wstring conv (std::string _str) {
         return std::wstring(_str.begin(), _str.end());
     }
+
+    std::vector<std::string> dread (std::string _path, bool (*_filter)(std::string, int), int _eparam = GDIT_NULL) {
+        struct dirent *entry;
+        DIR *dir = opendir(_path.c_str());
+
+        std::vector<std::string> cont;
+        while ((entry = readdir(dir)) != NULL)
+            if (entry->d_type == DT_DIR)
+                if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+                    if (_filter(_path + "\\" + entry->d_name, _eparam))
+                        cont.push_back(entry->d_name);
+        closedir(dir);
+
+        return cont;
+    }
 }
 
 namespace console {
@@ -169,13 +185,13 @@ namespace console {
     void loadbar (std::string _txt, bool *_end) {
         std::chrono::milliseconds s = std::chrono::milliseconds(200);
         while (!*_end) {
-            std::cout << "\r/ "  << _txt;
+            std::cout << "\r / "  << _txt;
             std::this_thread::sleep_for(s);
-            std::cout << "\r- "  << _txt;
+            std::cout << "\r - "  << _txt;
             std::this_thread::sleep_for(s);
-            std::cout << "\r\\ " << _txt;
+            std::cout << "\r \\ " << _txt;
             std::this_thread::sleep_for(s);
-            std::cout << "\r| "  << _txt;
+            std::cout << "\r | "  << _txt;
             std::this_thread::sleep_for(s);
         }
         std::wcout << "\r* " << methods::conv(_txt) << std::endl;
