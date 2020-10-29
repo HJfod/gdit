@@ -5,3 +5,6 @@
 #define GDIT_SETTING_UPDATE_SUCCESS         20
 #define GDIT_SETTING_DOESNT_EXIST           21
 #define GDIT_IMPORT_SUCCESS                 22
+
+#define GDIT_TYPE_PART                      100
+#define GDIT_TYPE_GDIT                      101

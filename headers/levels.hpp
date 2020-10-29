@@ -248,7 +248,25 @@ namespace gdit {
         }
     }
 
-    std::vector<std::string> GetAllRepos() {
+    bool VerifyDirIsRepo(std::string _dir, int _type = GDIT_TYPE_GDIT) {
+        if (_type == GDIT_TYPE_GDIT)
+            return methods::fexists(_dir + "\\master");
+        
+        struct dirent *entry;
+        DIR *dir = opendir(_dir.c_str());
+
+        while ((entry = readdir(dir)) != NULL)
+            if (entry->d_type == DT_DIR)
+                if (((std::string)entry->d_name)._Starts_with("part_")) {
+                    closedir (dir);
+                    return true;
+                }
+        closedir(dir);
+
+        return false;
+    }
+
+    std::vector<std::string> GetAllRepos(int _type = GDIT_TYPE_GDIT) {
         struct dirent *entry;
         DIR *dir = opendir(app::dir::main.c_str());
 
@@ -256,9 +274,8 @@ namespace gdit {
         while ((entry = readdir(dir)) != NULL)
             if (entry->d_type == DT_DIR)
                 if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
-                    if (methods::fexists(app::dir::main + "\\" + entry->d_name + "\\master"))
+                    if (VerifyDirIsRepo(app::dir::main + "\\" + entry->d_name, _type))
                         cont.push_back(entry->d_name);
-
         closedir(dir);
 
         return cont;

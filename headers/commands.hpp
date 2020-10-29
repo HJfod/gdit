@@ -36,7 +36,8 @@ namespace commands {
                     std::cout << "Succesfully imported part! You can now start working on it :)" << std::endl << "NOTE: DO *NOT* CHANGE THE NAME OF THE LEVEL." << std::endl;
                 else std::cout << "Error: " << x << std::endl;
             }
-        } else switch ($(args[0].c_str())) {
+        } else
+        switch ($(args[0].c_str())) {
             #pragma region init
             case $("init"):
                 {
@@ -97,6 +98,7 @@ namespace commands {
                         }
                     } else lvl = args[1];
 
+                    if (lvl == "") return;
                     if (gdit::GditExists(lvl)) {
                         std::cout << gdit::GetGditLevel(lvl) << std::endl;
                         std::cout << "Send this file to your collab participants! :)" << std::endl;
@@ -106,7 +108,29 @@ namespace commands {
             #pragma endregion get
             #pragma region commit
             case $("commit"):
-                {}
+                {
+                    std::string lvl;
+                    if (comc < 3) {
+                        std::vector<std::string> repos = gdit::GetAllRepos(GDIT_TYPE_PART);
+                        if (repos.size() == 0)
+                            std::cout << "You have no gdit parts! Use \"gdit <path-to-file>\" to begin working on a gdit part." << std::endl;
+                        else {
+                            std::cout << "Select a gdit part to commit:" << std::endl;
+                            std::string res;
+                            int s = console::selectmenu(repos, &res);
+
+                            if (s == -1)
+                                std::cout << "Cancelled selection" << std::endl;
+                            else
+                                lvl = res;
+                        }
+                    } else lvl = args[1];
+
+                    if (lvl == "") return;
+                    if (gdit::GditExists(lvl)) {
+                        std::cout << "Commit succesful!" << std::endl;
+                    } else std::cout << "gdit part not found!" << std::endl;
+                }
                 break;
             #pragma endregion commit
             #pragma region setup
