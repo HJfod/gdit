@@ -2,8 +2,8 @@
 for /f "tokens=1,* delims= " %%a in ("%*") do set ARGS=%%b
 if "%1"=="r" (goto run)
 echo Compiling...
-windres gdit.rc -O coff -o gdit.res --target=pe-i386
-clang main.cpp ext/ZlibHelper.cpp -o gdit.exe gdit.res -L"." -lshell32 -lole32 -lzlib -m32 -std=c++17 -O3
+windres gdit.rc -O coff -o resources/gdit.res --target=pe-i386
+clang main.cpp ext/ZlibHelper.cpp -o gdit.exe resources/gdit.res -L"." -lshell32 -lole32 -lzlib -m32 -std=c++17 -O3
 if %errorlevel% == 0 (echo Successfully Compiled!) else (goto error)
 if "%1"=="p" (goto publish)
 if "%1"=="c" (goto done) else (goto run)
