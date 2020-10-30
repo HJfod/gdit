@@ -1,10 +1,14 @@
 #include <iostream>
 #include <Windows.h>
-#include "wind.h"
+#include "wind.hpp"
 
 namespace gui {
     void init() {
-        gdit_window* main = new gdit_window("main");
+        int SDL_Init(SDL_INIT_VIDEO);
+        SDL_VideoInit(NULL);
+
+        gdit_window* w_main = new gdit_window;
+        w_main->init(GDIT_APP_TITLE);
     }
 
     void close() {
