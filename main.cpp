@@ -1,5 +1,9 @@
 #include <iostream>
 #include "headers/commands.hpp"
+#ifdef GUI
+    #include "gui/gui.hpp"
+    #undef main
+#endif
 //#include <io.h>
 //#include <fcntl.h>
 
@@ -10,6 +14,17 @@ int main(int argc, char *argv[]) {
     app::dir::init();
 
     commands::parse(argc, argv);
+
+    #ifdef GUI
+        if (argc < 2 || strcmp(argv[1], "debug")) {
+            HWND windowHandle = GetConsoleWindow();
+            ShowWindow(windowHandle, SW_HIDE);
+
+            gui::init();
+            gui::run();
+            gui::close();
+        }
+    #endif
 
     return 0;
 }

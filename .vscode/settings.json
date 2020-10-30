@@ -63,6 +63,7 @@
         "xhash": "cpp",
         "xtree": "cpp",
         "string": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "*.rh": "cpp"
     }
 }
