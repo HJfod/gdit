@@ -18,61 +18,10 @@ namespace gui {
         struct size {
             int w; int h;
         };
-
-        void circle(SDL_Renderer* rx, point p, int r) {
-            for (int w = 0; w < r * 2; w++) {
-                for (int h = 0; h < r * 2; h++) {
-                    int dx = r - w; // horizontal offset
-                    int dy = r - h; // vertical offset
-                    if ((dx*dx + dy*dy) <= (r * r))
-                    {
-                        SDL_RenderDrawPoint(rx, p.x + dx, p.y + dy);
-                    }
-                }
-            }
-        }
-
-        void rect(SDL_Renderer* rx, point p, size s, int cr = 0) {
-            SDL_Rect rect;
-            if (cr <= 0) {
-                rect.x = p.x; rect.y = p.y; rect.w = s.w; rect.h = s.h;
-                SDL_RenderFillRect(rx, &rect);
-            } else {
-                rect.x = p.x + cr; rect.y = p.y + cr; rect.w = s.w - cr * 2; rect.h = s.h - cr * 2;
-                SDL_Rect ns;
-                ns.x = rect.x; ns.y = p.y; ns.w = rect.w; ns.h = s.h;
-                SDL_Rect ew;
-                ew.x = p.x; ew.y = rect.y; ew.w = s.w; ew.h = rect.h;
-                SDL_RenderFillRect(rx, &ns);
-                SDL_RenderFillRect(rx, &ew);
-                circle(rx, { rect.x, rect.y }, cr);
-                circle(rx, { rect.x + rect.w, rect.y }, cr);
-                circle(rx, { rect.x, rect.y + rect.h }, cr);
-                circle(rx, { rect.x + rect.w, rect.y + rect.h }, cr);
-            }
-        }
-
-        void text(SDL_Renderer* rx, std::string _txt, point p) {
-            TTF_Font* Sans = TTF_OpenFont("resources/OpenSans.ttf", 24);
-
-            SDL_Color White = {255, 255, 255}; 
-
-            SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, _txt.c_str(), White);
-
-            SDL_Texture* Message = SDL_CreateTextureFromSurface(rx, surfaceMessage);
-
-            SDL_Rect Message_rect;
-            Message_rect.x = p.x;
-            Message_rect.y = p.y;
-            Message_rect.w = 100;
-            Message_rect.h = 100;
-
-            SDL_RenderCopy(rx, Message, NULL, &Message_rect);
-
-            std::cout << _txt;
-
-            SDL_FreeSurface(surfaceMessage);
-            SDL_DestroyTexture(Message);
+        TTF_Font* gui_fnt;
+        
+        void draw_init() {
+            gui_fnt = TTF_OpenFont("resources/OpenSans.ttf", 15);
         }
     }
 
@@ -128,11 +77,64 @@ namespace gui {
             void close();
     };
 
+    namespace draw {
+        void circle(SDL_Renderer* rx, point p, int r) {
+            for (int w = 0; w < r * 2; w++) {
+                for (int h = 0; h < r * 2; h++) {
+                    int dx = r - w; // horizontal offset
+                    int dy = r - h; // vertical offset
+                    if ((dx*dx + dy*dy) <= (r * r))
+                    {
+                        SDL_RenderDrawPoint(rx, p.x + dx, p.y + dy);
+                    }
+                }
+            }
+        }
+
+        void rect(SDL_Renderer* rx, point p, size s, int cr = 0) {
+            SDL_Rect rect;
+            if (cr <= 0) {
+                rect.x = p.x; rect.y = p.y; rect.w = s.w; rect.h = s.h;
+                SDL_RenderFillRect(rx, &rect);
+            } else {
+                rect.x = p.x + cr; rect.y = p.y + cr; rect.w = s.w - cr * 2; rect.h = s.h - cr * 2;
+                SDL_Rect ns;
+                ns.x = rect.x; ns.y = p.y; ns.w = rect.w; ns.h = s.h;
+                SDL_Rect ew;
+                ew.x = p.x; ew.y = rect.y; ew.w = s.w; ew.h = rect.h;
+                SDL_RenderFillRect(rx, &ns);
+                SDL_RenderFillRect(rx, &ew);
+                circle(rx, { rect.x, rect.y }, cr);
+                circle(rx, { rect.x + rect.w, rect.y }, cr);
+                circle(rx, { rect.x, rect.y + rect.h }, cr);
+                circle(rx, { rect.x + rect.w, rect.y + rect.h }, cr);
+            }
+        }
+
+        void text(gdit_window* _wind, std::string _txt, point p) {
+            SDL_Color White = {255, 255, 255}; 
+            SDL_Surface* surfaceMessage = TTF_RenderText_Solid(gui_fnt, _txt.c_str(), White);
+            SDL_Texture* Message = SDL_CreateTextureFromSurface(_wind->renderer, surfaceMessage);
+
+            SDL_Rect Message_rect;
+            if (p.x >= 0) Message_rect.x = p.x;
+            if (p.y >= 0) Message_rect.y = p.y;
+            TTF_SizeText(gui_fnt, _txt.c_str(), &Message_rect.w, &Message_rect.h);
+            if (p.x < 0) Message_rect.x = ((_wind->size.w-Message_rect.w) / 2);
+            if (p.y < 0) Message_rect.y = ((_wind->size.h-Message_rect.h) / 2);
+
+            SDL_RenderCopy(_wind->renderer, Message, NULL, &Message_rect);
+
+            SDL_FreeSurface(surfaceMessage);
+            SDL_DestroyTexture(Message);
+        }
+    }
+
     namespace windows {
         unsigned int ids = 0;
         std::vector<gdit_window*> all = {};
     }
-
+    
     void gdit_window::handle (SDL_Event _e) {
         if (SDL_GetWindowFlags(this->window) & SDL_WINDOW_INPUT_FOCUS)
             switch (_e.type) {
@@ -165,7 +167,7 @@ namespace gui {
             style::colors::main_bg.R, style::colors::main_bg.G, style::colors::main_bg.B, 255);
         draw::rect(this->renderer, { 0, 0 }, { this->size.w, this->size.h }, sett::app_size::c);
 
-        draw::text(this->renderer, this->name, { 0, 0 });
+        draw::text(this, this->name, { -1, 5 });
 
         SDL_RenderPresent(this->renderer);
 
