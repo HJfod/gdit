@@ -1,11 +1,8 @@
 #include <iostream>
 #include "headers/commands.hpp"
-#ifdef GUI_SDL
+#ifdef GUI
     #include "gui/gui.hpp"
     #undef main
-#endif
-#ifdef GUI
-    #include "gui/tk/gui.hpp"
 #endif
 
 int main(int argc, char *argv[]) {
@@ -13,12 +10,8 @@ int main(int argc, char *argv[]) {
     app::dir::init();
 
     commands::parse(argc, argv);
-    
-    #ifdef GUI
-        gui::main();
-    #endif
 
-    #ifdef GUI_SDL
+    #ifdef GUI
         if (argc < 2 || strcmp(argv[1], "debug")) {
             HWND windowHandle = GetConsoleWindow();
             ShowWindow(windowHandle, SW_HIDE);

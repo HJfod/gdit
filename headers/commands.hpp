@@ -106,6 +106,7 @@ namespace commands {
 
             if (lvl == "") return;
             if (gdit::GditExists(lvl)) {
+                gdit::CommitChanges(lvl);
                 std::cout << "Commit succesful!" << std::endl;
             } else std::cout << "gdit part not found!" << std::endl;
         }

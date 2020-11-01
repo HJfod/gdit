@@ -309,4 +309,8 @@ namespace gdit {
         gd::levels::ImportLevel(_path, "", gdname);
         return GDIT_IMPORT_SUCCESS;
     }
+
+    void CommitChanges(std::string _gdit) {
+        std::cout << _gdit << std::endl;
+    }
 }

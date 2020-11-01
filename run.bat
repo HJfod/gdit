@@ -7,7 +7,11 @@ set g=0
 if "%1"=="gui" set g=1
 if "%1"=="guic" set g=1
 if "%1"=="guip" set g=1
-if %g%==1 (clang main.cpp ext/ZlibHelper.cpp -o gdit-gui.exe resources/gdit.res -L"." -DGUI -lSDL2 -lSDL2main -luser32 -ldwmapi -lSDL2_ttf -lshell32 -lole32 -lzlib -m32 -mwindows -std=c++17 -O3) else (clang main.cpp ext/ZlibHelper.cpp -o gdit.exe resources/gdit.res -L"." -lshell32 -lole32 -lzlib -m32 -std=c++17 -O3)
+if %g%==1 (
+    clang main.cpp ext/ZlibHelper.cpp -o gdit-gui.exe resources/gdit.res -L"." -DGUI -lSDL2 -lSDL2main -luser32 -ldwmapi -lSDL2_ttf -lshell32 -lole32 -lzlib -m32 -mwindows -std=c++17 -O3
+) else (
+    clang main.cpp ext/ZlibHelper.cpp -o gdit.exe resources/gdit.res -L"." -lshell32 -lole32 -lzlib -m32 -std=c++17 -O3
+)
 if %errorlevel% == 0 (echo Successfully Compiled!) else (goto error)
 if "%1"=="p" (goto publish)
 if "%1"=="guip" (goto publishwgui)
