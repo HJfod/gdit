@@ -4,11 +4,12 @@
 #include <vector>
 #include <fstream>
 #include <regex>
+#include <algorithm>
 #include "main.hpp"
 #include "../ext/ZlibHelper.hpp"
 #include "../ext/Base64.hpp"
-#include "../ext/json.hpp"
 #include "../ext/dirent.h"
+#include "../ext/json.hpp"
 
 namespace gd {
     namespace decode {
@@ -81,6 +82,10 @@ namespace gd {
             if (app::decoded_data.empty())
                 return DecodeCCLocalLevels();
             return app::decoded_data;
+        }
+
+        std::string DecodeLevelData(std::string _data) {
+            return DecompressGZip(DecodeBase64(_data));
         }
     }
 
@@ -207,6 +212,41 @@ namespace gd {
 
             return GDIT_IMPORT_SUCCESS;
         }
+
+        struct gd_obj {
+            std::string data;
+        };
+
+        struct obj_group {
+            std::string obj_type;
+            std::vector<gd_obj> objs;
+        };
+
+        std::vector<gd_obj> GetObjects(std::string _decoded_data, std::vector<obj_group>* _ordered = NULL) {
+            std::string d = _decoded_data.substr(_decoded_data.find(";") + 1);
+            std::vector<gd_obj> res = {};
+            std::vector<obj_group> orres = {};
+            while (d.length() > 0) {
+                if (d.find(";") == std::string::npos) break;
+                std::string obj = d.substr(0, d.find(";"));
+                d = d.substr(obj.length() + 1);
+                if (obj.empty()) continue;
+                res.push_back({ obj });
+                if (_ordered != NULL) {
+                    std::string id = obj.substr(obj.find_first_of(",") + 1);
+                    id = id.substr(0, id.find_first_of(","));
+                    int ix = -1, i = 0;
+                    for (obj_group gr : orres)
+                        if (gr.obj_type == id) ix = i; else i++;
+                    if (ix == -1)
+                        orres.push_back({ id, { { obj } } });
+                    else
+                        orres[ix].objs.push_back({ obj });
+                }
+            }
+            *_ordered = orres;
+            return res;
+        }
     }
 }
 
@@ -310,7 +350,76 @@ namespace gdit {
         return GDIT_IMPORT_SUCCESS;
     }
 
-    void CommitChanges(std::string _gdit) {
-        std::cout << _gdit << std::endl;
+    int CommitChanges(std::string _gdit, bool* _stop_animation = NULL) {
+        if (app::settings::sval("username") == "")
+            return GDIT_USERNAME_NOT_SET;
+        std::string dir = methods::workdir() + "\\" + app::dir::main + "\\" + _gdit + "\\" + "part_" + app::settings::sval("username");
+        
+        std::string gd_name = methods::sanitize(nlohmann::json::parse(methods::fread(dir + "\\" + _gdit + "." + ext::main))["name"].dump());
+
+        std::string err;
+        std::string lvl = gd::levels::GetLevel(gd_name, &err);
+        if (lvl == "") {
+            if (_stop_animation != NULL)
+                *_stop_animation = true;
+            std::cout << err << std::endl;
+            return GDIT_LEVEL_DOESNT_EXIST;
+        }
+
+        std::string olvl = methods::fread(dir + "\\" + _gdit + ".og." + ext::level);
+        if (olvl == "")
+            return GDIT_LEVEL_DOESNT_EXIST;
+
+        std::string new_k4 = gd::levels::GetKey(lvl,  "k4");
+        std::string og_k4  = gd::levels::GetKey(olvl, "k4");
+
+        if (new_k4 == og_k4)
+            return GDIT_COMMIT_SUCCESS;
+
+        std::vector<gd::levels::obj_group> objs = {};
+        std::string dec_og = gd::decode::DecodeLevelData(og_k4);
+        std::string dec_new= gd::decode::DecodeLevelData(new_k4);
+        gd::levels::GetObjects(gd::decode::DecodeLevelData(og_k4), &objs);
+
+        std::vector<gd::levels::gd_obj> obj_removed = {};
+        std::vector<gd::levels::gd_obj> obj_added = {};
+
+        /*
+        for (gd::levels::obj_group gr : objs) {
+            std::cout << gr.obj_type << ": [ ";
+            for (gd::levels::gd_obj o : gr.objs)
+                std::cout << o.data << "; ";
+            std::cout << " ]" << std::endl;
+        }
+        */
+
+        std::string d = dec_new.substr(dec_new.find(";") + 1);
+        int i = 0;
+        while (d.length() > 0) {
+            if (d.find(";") == std::string::npos) break;
+            std::string obj = d.substr(0, d.find(";"));
+            d = d.substr(obj.length() + 1);
+            if (obj.empty()) continue;
+
+            std::string id = obj.substr(obj.find_first_of(",") + 1);
+            id = id.substr(0, id.find_first_of(","));
+            int ix = -1, i = 0;
+            for (gd::levels::obj_group gr : objs)
+                if (gr.obj_type == id) ix = i; else i++;
+            bool found = false;
+            if (ix == -1)
+                obj_added.push_back({ obj });
+            else
+                for (gd::levels::gd_obj o : objs[ix].objs)
+                    if (o.data == obj)
+                        found = true;
+            if (!found)
+                obj_added.push_back({ obj });
+        }
+        
+        std::cout << "Added objects:  \t"     << obj_added.size()   << std::endl;
+        std::cout << "Removed objects:\t"   << obj_removed.size()   << std::endl;
+
+        return GDIT_COMMIT_SUCCESS;
     }
 }

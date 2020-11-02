@@ -4,8 +4,12 @@
     #include "gui/gui.hpp"
     #undef main
 #endif
+//#include <io.h>
+//#include <fcntl.h>
 
 int main(int argc, char *argv[]) {
+    //_setmode(_fileno(stdout), _O_U16TEXT);
+
     app::settings::load();
     app::dir::init();
 
@@ -15,28 +19,8 @@ int main(int argc, char *argv[]) {
         if (argc < 2 || strcmp(argv[1], "debug")) {
             HWND windowHandle = GetConsoleWindow();
             ShowWindow(windowHandle, SW_HIDE);
-
-            gui::init();
-
-            SDL_Event event;
-
-            while (!gui::sett::quit) {
-                if (SDL_PollEvent(&event)) {
-                    if(event.type == SDL_QUIT)
-                        gui::sett::quit = true;
-                    if (event.type == SDL_TEXTINPUT)
-                        if (std::string(event.text.text) == "n") {
-                            gui::gdit_window* w_ = new gui::gdit_window;
-                            w_->init("__w__");
-                        }
-                    for (gui::gdit_window* w : gui::windows::all)
-                        w->handle(event);
-                }
-
-                for (gui::gdit_window* w : gui::windows::all)
-                    if (w->update) w->render();
-            }
         }
+        gui::init();
     #endif
 
     return 0;

@@ -5,6 +5,9 @@
 #define GDIT_SETTING_UPDATE_SUCCESS         20
 #define GDIT_SETTING_DOESNT_EXIST           21
 #define GDIT_IMPORT_SUCCESS                 22
+#define GDIT_USERNAME_NOT_SET               30
+#define GDIT_COMMIT_SUCCESS                 31
+#define GDIT_LEVEL_DOESNT_EXIST             35
 
 #define GDIT_TYPE_PART                      100
 #define GDIT_TYPE_GDIT                      101
@@ -14,3 +17,4 @@
 #define GDIT_APP_VERSION "v1.0"
 #define GDIT_APP_BUILD "DEV-201030"
 #define GDIT_APP_TITLE GDIT_APP_NAME " " GDIT_APP_VERSION " " GDIT_APP_BUILD
+#define GDIT_COMMIT_VERSION "1"
