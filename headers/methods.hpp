@@ -123,6 +123,23 @@ namespace methods {
 
         return cont;
     }
+
+    int count (std::string _s, char _c) {
+        int count = 0;
+        for (int i = 0; i < _s.size(); i++)
+            if (_s[i] == _c) count++;
+        return count;
+    }
+
+    std::string time (std::string _sep = "-") {
+        std::time_t t = std::time(0);
+        std::tm now;
+        localtime_s(&now, &t);
+        std::stringstream ss;
+        ss << (now.tm_year + 1900) << _sep << (now.tm_mon + 1) << _sep << now.tm_mday << _sep << now.tm_hour << _sep << now.tm_min;
+
+        return ss.str();
+    }
 }
 
 namespace console {

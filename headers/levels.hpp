@@ -252,15 +252,9 @@ namespace gd {
 
 namespace gdit {
     nlohmann::json GenerateGDitLevelInfo(std::string _data) {
-        std::time_t t = std::time(0);
-        std::tm now;
-        localtime_s(&now, &t);
-        std::stringstream ss;
-        ss << (now.tm_year + 1900) << '-' << (now.tm_mon + 1) << '-' << now.tm_mday << '-' << now.tm_hour << '-' << now.tm_min;
-
         return {
             { "name", gd::levels::GetKey(_data, "k2") },
-            { "init-time", ss.str() }
+            { "init-time", methods::time() }
         };
     }
 
@@ -379,11 +373,11 @@ namespace gdit {
         std::vector<gd::levels::obj_group> objs = {};
         std::string dec_og = gd::decode::DecodeLevelData(og_k4);
         std::string dec_new= gd::decode::DecodeLevelData(new_k4);
-        gd::levels::GetObjects(gd::decode::DecodeLevelData(og_k4), &objs);
+        std::vector<gd::levels::gd_obj> new_obj = gd::levels::GetObjects(gd::decode::DecodeLevelData(og_k4), &objs);
 
-        std::vector<gd::levels::gd_obj> obj_removed = {};
-        std::vector<gd::levels::gd_obj> obj_added = {};
-
+        std::string obj_removed = "";
+        std::string obj_added = "";
+        
         /*
         for (gd::levels::obj_group gr : objs) {
             std::cout << gr.obj_type << ": [ ";
@@ -394,12 +388,14 @@ namespace gdit {
         */
 
         std::string d = dec_new.substr(dec_new.find(";") + 1);
-        int i = 0;
+        int obj_count = 0;
         while (d.length() > 0) {
             if (d.find(";") == std::string::npos) break;
             std::string obj = d.substr(0, d.find(";"));
             d = d.substr(obj.length() + 1);
             if (obj.empty()) continue;
+
+            obj_count++;
 
             std::string id = obj.substr(obj.find_first_of(",") + 1);
             id = id.substr(0, id.find_first_of(","));
@@ -407,18 +403,39 @@ namespace gdit {
             for (gd::levels::obj_group gr : objs)
                 if (gr.obj_type == id) ix = i; else i++;
             bool found = false;
-            if (ix == -1)
-                obj_added.push_back({ obj });
-            else
-                for (gd::levels::gd_obj o : objs[ix].objs)
-                    if (o.data == obj)
-                        found = true;
+            int j = 0;
+            if (ix == -1) {
+                obj_added += obj + "\n";
+            } else for (gd::levels::gd_obj o : objs[ix].objs)
+                if (o.data == obj) {
+                    found = true;
+                    objs[ix].objs.erase(objs[ix].objs.begin() + j);
+                    break;
+                } else j++;
+            std::cout << obj_count << "_";
             if (!found)
-                obj_added.push_back({ obj });
+                obj_added += obj + "\n";
         }
+
+        std::cout << "new level object count:\t" << obj_count << std::endl;
+        std::cout << "old level object count:\t" << new_obj.size() << std::endl;
         
-        std::cout << "Added objects:  \t"     << obj_added.size()   << std::endl;
-        std::cout << "Removed objects:\t"   << obj_removed.size()   << std::endl;
+        for (gd::levels::obj_group gr : objs)
+            for (gd::levels::gd_obj go : gr.objs)
+                obj_removed += go.data + "\n";
+        
+        std::cout << "Added objects:  \t"   << methods::count(obj_added, '\n')  << std::endl;
+        std::cout << "Removed objects:\t"   << methods::count(obj_removed, '\n')<< std::endl;
+
+        std::string output_file = "";
+        
+        nlohmann::json ij;
+        ij["type"] = GDIT_COMMIT_VERSION;
+        output_file += "INFO " + std::to_string(ij.dump().length()) + "\n" + ij.dump() + "\n";
+        output_file += "ADDED "   + std::to_string(methods::count(obj_added, '\n'))   + "\n" + obj_added;
+        output_file += "REMOVED " + std::to_string(methods::count(obj_removed, '\n')) + "\n" + obj_removed;
+
+        methods::fsave(dir + "\\commit_" + methods::time("_") + "." + ext::commit, output_file);
 
         return GDIT_COMMIT_SUCCESS;
     }

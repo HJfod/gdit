@@ -64,6 +64,9 @@
         "xtree": "cpp",
         "string": "cpp",
         "thread": "cpp",
-        "*.rh": "cpp"
+        "*.rh": "cpp",
+        "atomic": "cpp",
+        "condition_variable": "cpp",
+        "mutex": "cpp"
     }
 }
