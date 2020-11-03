@@ -5,6 +5,7 @@
 #include <fstream>
 #include <regex>
 #include <algorithm>
+#include <stdio.h>
 #include "main.hpp"
 #include "../ext/ZlibHelper.hpp"
 #include "../ext/Base64.hpp"
@@ -449,7 +450,7 @@ namespace gdit {
         
         if (_out != NULL) {
             *_out = "Added objects:  \t" + std::to_string(methods::count(obj_added, '\n')) + "\n";
-            *_out = "Removed objects:  \t" + std::to_string(methods::count(obj_removed, '\n')) + "\n";
+            *_out +="Removed objects:  \t" + std::to_string(methods::count(obj_removed, '\n')) + "\n";
         }
 
         return GDIT_COMMIT_SUCCESS;
@@ -459,6 +460,10 @@ namespace gdit {
         if (app::settings::sval("username") == "")
             return GDIT_USERNAME_NOT_SET;
         std::string dir = methods::workdir() + "\\" + app::dir::main + "\\" + _gdit + "\\" + "part_" + app::settings::sval("username");
+
+        for (std::string com : methods::dall(methods::workdir() + "\\" + app::dir::main + "\\" + _gdit + "\\" + "part_" + app::settings::sval("username")))
+            if (com.find(".commit.") != std::string::npos)
+                remove((methods::workdir() + "\\" + app::dir::main + "\\" + _gdit + "\\" + "part_" + app::settings::sval("username") + "\\" + com).c_str());
 
         methods::fcopy(
             dir + "\\" + _gdit + ".og." + ext::level,
@@ -470,22 +475,27 @@ namespace gdit {
 
     int MergeCommit(std::string _part_path) {
         std::string name = GetGDitNameFromCommit(_part_path);
-        std::string dir = methods::workdir() + "\\" + name + "\\master";
-
-        std::cout << "d0" << std::endl;
+        std::string dir = methods::workdir() + "\\" + app::dir::main + "\\" + name + "\\master";
 
         if (!methods::fexists(dir))
             return GDIT_MERGE_MASTER_DOESNT_EXIST;
-
-        std::cout << "d1" << std::endl;
         
         std::string base = methods::fread(dir + "\\" + name + ".master." + ext::leveldata);
         std::string commit = methods::fread(_part_path);
 
-        std::cout << commit.substr(commit.find_first_of(" ") + 1, commit.find_first_of("\n")) << std::endl;
-
-        if (std::stoi(commit.substr(commit.find_first_of(" ") + 1, commit.find_first_of("\n"))) > GDIT_COMMIT_VERSION)
+        int s = commit.find_first_of(" ") + 1;
+        if (std::stoi(commit.substr(s, commit.find_first_of("\n") - s - 1 /* /r */)) > GDIT_COMMIT_VERSION)
             return GDIT_MERGE_VERSION_NEWER;
+        
+        int a_s = commit.find("\nADDED ") + 7;
+        int a_r = commit.find("\nREMOVED ") + 9;
+        
+        int add = std::stoi(commit.substr(a_s, commit.find_first_of("\n", a_s) - a_s - 1));
+        int rem = std::stoi(commit.substr(a_r, commit.find_first_of("\n", a_r) - a_r - 1));
+
+        // SAVE TO COMMITS AS A FUCKING JSON WHY SHOULD I BOTHER WITH THIS SHIT
+
+        for (int i = 0; i < add; i++) {}
 
         return GDIT_MERGE_SUCCESS;
     }

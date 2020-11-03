@@ -119,7 +119,6 @@ namespace commands {
         }
 
         void merge(std::string _part) {
-                std::cout << _part << std::endl;
             if (gdit::GditExists(gdit::GetGDitNameFromCommit(_part))) {
                 int m = gdit::MergeCommit(_part);
                 

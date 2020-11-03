@@ -124,6 +124,19 @@ namespace methods {
         return cont;
     }
 
+    std::vector<std::string> dall (std::string _path) {
+        struct dirent *entry;
+        DIR *dir = opendir(_path.c_str());
+
+        std::vector<std::string> cont;
+        while ((entry = readdir(dir)) != NULL)
+            if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+                cont.push_back(entry->d_name);
+        closedir(dir);
+
+        return cont;
+    }
+
     int count (std::string _s, char _c) {
         int count = 0;
         for (int i = 0; i < _s.size(); i++)
