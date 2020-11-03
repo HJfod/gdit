@@ -9,6 +9,8 @@
 #define GDIT_COMMIT_SUCCESS                 31
 #define GDIT_LEVEL_DOESNT_EXIST             35
 #define GDIT_MERGE_SUCCESS                  40
+#define GDIT_MERGE_MASTER_DOESNT_EXIST      41
+#define GDIT_MERGE_VERSION_NEWER            42
 
 #define GDIT_TYPE_PART                      100
 #define GDIT_TYPE_GDIT                      101

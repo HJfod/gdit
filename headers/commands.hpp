@@ -124,7 +124,8 @@ namespace commands {
                 
                 if (m == GDIT_MERGE_SUCCESS)
                     std::cout << "Succesfully merged!" << std::endl;
-            } else std::cout << "GDit not found! (You're not the owner of the master branch?)";
+                else std::cout << "Error merging: " << m << std::endl;
+            } else std::cout << "GDit not found! (Are you not the megacollab host?)";
         }
 
         void setup(std::string _var = "", std::string _val = "") {
@@ -173,6 +174,16 @@ namespace commands {
             case $("commit"):
                 {
                     g::commit(comc < 3 ? "" : args[1]);
+                }
+                break;
+            case $("com_reset"):
+                {
+                    if (comc < 3) std::cout << "You need to supply a gdit part to erase commits in!" << std::endl;
+                    else {
+                        int g = gdit::ResetCommits(args[1]);
+                        if (g == GDIT_COMMIT_SUCCESS) std::cout << "Succesfully reset commits!";
+                        else std::cout << "Error resetting: " << g << std::endl;
+                    }
                 }
                 break;
             #pragma endregion commit

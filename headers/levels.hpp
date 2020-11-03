@@ -439,6 +439,7 @@ namespace gdit {
         nlohmann::json ij;
         ij["type"] = GDIT_COMMIT_VERSION;
         ij["gdit_name"] = _gdit;
+        output_file += "VERSION " + ij["type"].dump() + "\n";
         output_file += "INFO " + std::to_string(ij.dump().length()) + "\n" + ij.dump() + "\n";
         output_file += "ADDED "   + std::to_string(methods::count(obj_added, '\n'))   + "\n" + obj_added;
         output_file += "REMOVED " + std::to_string(methods::count(obj_removed, '\n')) + "\n" + obj_removed;
@@ -467,6 +468,17 @@ namespace gdit {
     }
 
     int MergeCommit(std::string _part_path) {
+        std::string name = GetGDitNameFromCommit(_part_path);
+        std::string dir = methods::workdir() + "\\" + name + "\\master";
+        if (!methods::fexists(dir))
+            return GDIT_MERGE_MASTER_DOESNT_EXIST;
+        
+        std::string base = methods::fread(dir);
+        std::string commit = methods::fread(_part_path);
+
+        if (std::stoi(commit.substr(commit.find_first_of(" ") + 1, commit.find_first_of("\n"))) > std::stoi(GDIT_COMMIT_VERSION))
+            return GDIT_MERGE_VERSION_NEWER;
+
         return GDIT_MERGE_SUCCESS;
     }
 }

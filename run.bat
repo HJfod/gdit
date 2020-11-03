@@ -21,8 +21,9 @@ if "%1"=="guic" (goto done) else (goto run)
 :run
 echo Running...
 echo.
-if "%1"=="a" (gdit.exe %ARGS%)
+if "%1"=="a" (gdit.exe %ARGS%) else (
 if "%1"=="gui" (gdit-gui.exe) else (gdit.exe)
+)
 goto done
 
 :error
