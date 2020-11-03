@@ -315,6 +315,14 @@ namespace gdit {
         return sh.substr(0, sh.find_first_of(".", 0));
     }
 
+    std::string GetGDitNameFromCommit(std::string _path) {
+        if (!methods::fexists(_path)) return "";
+        std::string txt = methods::fread(_path);
+        return methods::sanitize(nlohmann::json::parse(txt.substr(txt.find_first_of("\n") + 1, 
+            std::stoi(txt.substr(txt.find_first_of(" "), txt.find_first_of("\n") - txt.find_first_of(" ")))
+        ))["gdit_name"].dump());
+    }
+
     int AddGditPart(std::string _path, std::string _creator) {
         std::string name = GetGDitNameFromPath(_path);
         std::string tp = "";
@@ -344,7 +352,7 @@ namespace gdit {
         return GDIT_IMPORT_SUCCESS;
     }
 
-    int CommitChanges(std::string _gdit, bool* _stop_animation = NULL) {
+    int CommitChanges(std::string _gdit, std::string* _out = NULL, bool* _stop_animation = NULL) {
         if (app::settings::sval("username") == "")
             return GDIT_USERNAME_NOT_SET;
         std::string dir = methods::workdir() + "\\" + app::dir::main + "\\" + _gdit + "\\" + "part_" + app::settings::sval("username");
@@ -354,21 +362,23 @@ namespace gdit {
         std::string err;
         std::string lvl = gd::levels::GetLevel(gd_name, &err);
         if (lvl == "") {
-            if (_stop_animation != NULL)
-                *_stop_animation = true;
-            std::cout << err << std::endl;
+            *_out = err;
             return GDIT_LEVEL_DOESNT_EXIST;
         }
 
-        std::string olvl = methods::fread(dir + "\\" + _gdit + ".og." + ext::level);
+        std::string olvl = methods::fread(dir + "\\" + _gdit + ".work." + ext::level);
         if (olvl == "")
             return GDIT_LEVEL_DOESNT_EXIST;
+
+        methods::fsave(dir + "\\" + _gdit + ".work." + ext::level, lvl);
 
         std::string new_k4 = gd::levels::GetKey(lvl,  "k4");
         std::string og_k4  = gd::levels::GetKey(olvl, "k4");
 
-        if (new_k4 == og_k4)
+        if (new_k4 == og_k4) {
+            if (_out != NULL) *_out = "No changes found.\n";
             return GDIT_COMMIT_SUCCESS;
+        }
 
         std::vector<gd::levels::obj_group> objs = {};
         std::string dec_og = gd::decode::DecodeLevelData(og_k4);
@@ -380,12 +390,12 @@ namespace gdit {
         
         /*
         for (gd::levels::obj_group gr : objs) {
-            std::cout << gr.obj_type << ": [ ";
+            std::cout << gr.obj_type << ":\t [  ";
             for (gd::levels::gd_obj o : gr.objs)
                 std::cout << o.data << "; ";
             std::cout << " ]" << std::endl;
         }
-        */
+        //*/
 
         std::string d = dec_new.substr(dec_new.find(";") + 1);
         int obj_count = 0;
@@ -406,37 +416,57 @@ namespace gdit {
             int j = 0;
             if (ix == -1) {
                 obj_added += obj + "\n";
+                continue;
             } else for (gd::levels::gd_obj o : objs[ix].objs)
                 if (o.data == obj) {
                     found = true;
                     objs[ix].objs.erase(objs[ix].objs.begin() + j);
                     break;
                 } else j++;
-            std::cout << obj_count << "_";
             if (!found)
                 obj_added += obj + "\n";
         }
-
+        /*
         std::cout << "new level object count:\t" << obj_count << std::endl;
         std::cout << "old level object count:\t" << new_obj.size() << std::endl;
-        
+        */
         for (gd::levels::obj_group gr : objs)
             for (gd::levels::gd_obj go : gr.objs)
                 obj_removed += go.data + "\n";
-        
-        std::cout << "Added objects:  \t"   << methods::count(obj_added, '\n')  << std::endl;
-        std::cout << "Removed objects:\t"   << methods::count(obj_removed, '\n')<< std::endl;
 
         std::string output_file = "";
         
         nlohmann::json ij;
         ij["type"] = GDIT_COMMIT_VERSION;
+        ij["gdit_name"] = _gdit;
         output_file += "INFO " + std::to_string(ij.dump().length()) + "\n" + ij.dump() + "\n";
         output_file += "ADDED "   + std::to_string(methods::count(obj_added, '\n'))   + "\n" + obj_added;
         output_file += "REMOVED " + std::to_string(methods::count(obj_removed, '\n')) + "\n" + obj_removed;
 
-        methods::fsave(dir + "\\commit_" + methods::time("_") + "." + ext::commit, output_file);
+        methods::fsave(dir + "\\" + methods::time("_") + ".commit." + ext::commit, output_file);
+        
+        if (_out != NULL) {
+            *_out = "Added objects:  \t" + std::to_string(methods::count(obj_added, '\n')) + "\n";
+            *_out = "Removed objects:  \t" + std::to_string(methods::count(obj_removed, '\n')) + "\n";
+        }
 
         return GDIT_COMMIT_SUCCESS;
+    }
+
+    int ResetCommits(std::string _gdit) {
+        if (app::settings::sval("username") == "")
+            return GDIT_USERNAME_NOT_SET;
+        std::string dir = methods::workdir() + "\\" + app::dir::main + "\\" + _gdit + "\\" + "part_" + app::settings::sval("username");
+
+        methods::fcopy(
+            dir + "\\" + _gdit + ".og." + ext::level,
+            dir + "\\" + _gdit + ".work." + ext::level
+        );
+
+        return GDIT_COMMIT_SUCCESS;
+    }
+
+    int MergeCommit(std::string _part_path) {
+        return GDIT_MERGE_SUCCESS;
     }
 }

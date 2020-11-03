@@ -85,7 +85,7 @@ namespace commands {
                 std::cout << "Send this file to your collab participants! :)" << std::endl;
             } else std::cout << "gdit not found! Use \"gdit init <level>\" to create a gdit." << std::endl;
         }
-        
+
         void commit(std::string _name = "") {
             std::string lvl;
             if (_name == "") {
@@ -106,12 +106,25 @@ namespace commands {
 
             if (lvl == "") return;
             if (gdit::GditExists(lvl)) {
-                //bool end = false;
-                //console::loadbar("Detecting changes...", &end);
-                gdit::CommitChanges(lvl);
-                //end = true;
-                std::cout << "Commit succesful!" << std::endl;
+                bool end = false;
+                std::string res;
+                std::thread l = console::showload("Detecting changes... (this may take a while)", &end);
+                int r = gdit::CommitChanges(lvl, &res);
+                end = true;
+                l.join();
+                if (r == GDIT_COMMIT_SUCCESS)
+                    std::cout << "Commit succesful!" << std::endl << res << std::endl;
+                else std::cout << "Error committing: " << r << std::endl;
             } else std::cout << "gdit part not found!" << std::endl;
+        }
+
+        void merge(std::string _part) {
+            if (gdit::GditExists(gdit::GetGDitNameFromCommit(_part))) {
+                int m = gdit::MergeCommit(_part);
+                
+                if (m == GDIT_MERGE_SUCCESS)
+                    std::cout << "Succesfully merged!" << std::endl;
+            } else std::cout << "GDit not found! (You're not the owner of the master branch?)";
         }
 
         void setup(std::string _var = "", std::string _val = "") {
@@ -170,6 +183,14 @@ namespace commands {
                 }
                 break;
             #pragma endregion setup
+            #pragma region merge
+            case $("merge"):
+                {
+                    if (comc < 3) std::cout << "You need to supply a path to a ." << ext::commit << " file to merge!" << std::endl;
+                    else g::merge(args[1]);
+                }
+                break;
+            #pragma endregion merge
             #pragma region default
             default:
                 std::cout << "Unknown command. Use \"./gdit.exe help\" for a list of all commands." << std::endl;
