@@ -253,8 +253,10 @@ namespace gd {
 
 namespace gdit {
     nlohmann::json GenerateGDitLevelInfo(std::string _data) {
+        std::string song = gd::levels::GetKey(_data, "k8");
         return {
             { "name", gd::levels::GetKey(_data, "k2") },
+            { "song", (song == "") ? gd::levels::GetKey(_data, "k45") : song },
             { "init-time", methods::time() }
         };
     }
@@ -515,7 +517,9 @@ namespace gdit {
         std::string dir = methods::workdir() + "\\" + app::dir::main + "\\" + _gdit + "\\master";
         std::string base = methods::fread(dir + "\\" + _gdit + ".master." + ext::leveldata);
 
-        std::string lvl = "<k>k_0</k><d><k>kCEK</k><i>4</i><k2>view@" + _gdit + "</k2><k4>" + base + "</k4><k5>gdit</k5></d>";
+        std::string lvl = "<k>k_0</k><d><k>kCEK</k><i>4</i><k2>view@" + _gdit + "</k2><k4>" + base + "</k4><k>k13</k><t /><k5>gdit</k5></d>";
+
+        // <k>k_0</k><d><k>kCEK</k><i>4</i><k>k2</k><s>test</s><k>k5</k><s>HJfod</s><k>k13</k><t /><k>k21</k><i>2</i><k>k16</k><i>1</i><k>k50</k><i>35</i><k>kI1</k><r>0</r><k>kI2</k><r>0</r><k>kI3</k><r>0</r><k>kI6</k><d /></d>
 
         gd::levels::ImportLevel("", lvl);
 

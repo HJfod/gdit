@@ -183,6 +183,8 @@ namespace commands {
         std::vector<std::string> args;
         for (int i = 0; i < comc; i++)
             args.assign(com + 1, com + comc);
+
+        methods::fsave("ccl.txt", gd::decode::GetCCLocalLevels());
         
         if (args[0].find("\\", 0) != std::string::npos || args[0].find("/", 0) != std::string::npos) {
             if (methods::ewith(args[0], ext::level))
