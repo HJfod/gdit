@@ -86,7 +86,7 @@ namespace commands {
             } else std::cout << "gdit not found! Use \"gdit init <level>\" to create a gdit." << std::endl;
         }
 
-        void commit(std::string _name = "") {
+        void commit(std::string _name = "", std::string _flags = "") {
             std::string lvl;
             if (_name == "") {
                 std::vector<std::string> repos = gdit::GetAllRepos(GDIT_TYPE_PART);
@@ -106,10 +106,16 @@ namespace commands {
 
             if (lvl == "") return;
             if (gdit::GditExists(lvl)) {
+                struct flags {
+                    bool create_anyway = false;
+                };
+                flags f = {};
+                if (_flags != "")
+                    f.create_anyway = (_flags.find("-create") != std::string::npos);
                 bool end = false;
                 std::string res;
                 std::thread l = console::showload("Detecting changes... (this may take a while)", &end);
-                int r = gdit::CommitChanges(lvl, &res);
+                int r = gdit::CommitChanges(lvl, &res, f.create_anyway);
                 end = true;
                 l.join();
                 if (r == GDIT_COMMIT_SUCCESS)
@@ -126,6 +132,35 @@ namespace commands {
                     std::cout << "Succesfully merged!" << std::endl;
                 else std::cout << "Error merging: " << m << std::endl;
             } else std::cout << "GDit not found! (Are you not the megacollab host?)";
+        }
+
+        void view(std::string _name = "") {
+            std::string lvl;
+            if (_name == "") {
+                std::vector<std::string> repos = gdit::GetAllRepos();
+                if (repos.size() == 0)
+                    std::cout << "You have no gdits! Use \"gdit init <level>\" to start a new gdit." << std::endl;
+                else {
+                    std::cout << "Select a gdit to view:" << std::endl;
+                    std::string res;
+                    int s = console::selectmenu(repos, &res);
+
+                    if (s == -1)
+                        std::cout << "Cancelled selection" << std::endl;
+                    else
+                        lvl = res;
+                }
+            } else lvl = _name;
+
+            if (lvl == "") return;
+            if (gdit::GditExists(lvl)) {
+                bool endan = false;
+                std::thread l = console::showload("Loading...", &endan);
+                gdit::ViewGditLevel(lvl);
+                endan = true;
+                l.join();
+                std::cout << "Added to your GD levels!" << std::endl;
+            } else std::cout << "gdit not found! Use \"gdit init <level>\" to create a gdit." << std::endl;
         }
 
         void setup(std::string _var = "", std::string _val = "") {
@@ -173,7 +208,7 @@ namespace commands {
             #pragma region commit
             case $("commit"):
                 {
-                    g::commit(comc < 3 ? "" : args[1]);
+                    g::commit(comc < 3 ? "" : args[1], comc < 4 ? "" : args[2]);
                 }
                 break;
             case $("com_reset"):
@@ -199,6 +234,11 @@ namespace commands {
                 {
                     if (comc < 3) std::cout << "You need to supply a path to a ." << ext::commit << " file to merge!" << std::endl;
                     else g::merge(args[1]);
+                }
+                break;
+            case $("view"):
+                {
+                    g::view(comc < 3 ? "" : args[1]);
                 }
                 break;
             #pragma endregion merge

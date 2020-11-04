@@ -153,6 +153,19 @@ namespace methods {
 
         return ss.str();
     }
+
+    std::string remove(std::string _str, std::string _sub, bool all = false) {
+        if (all) {
+            int s;
+            while ((s = _str.find(_sub)) != std::string::npos)
+                _str = _str.erase(s, _sub.length());
+            return _str;
+        }
+        int s = _str.find(_sub);
+        if (s != std::string::npos)
+            return _str.erase(s, _sub.length());
+        else return _str;
+    }
 }
 
 namespace console {
