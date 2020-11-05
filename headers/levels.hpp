@@ -6,11 +6,14 @@
 #include <regex>
 #include <algorithm>
 #include <stdio.h>
+#include <chrono>
 #include "main.hpp"
 #include "../ext/ZlibHelper.hpp"
 #include "../ext/Base64.hpp"
 #include "../ext/dirent.h"
 #include "../ext/json.hpp"
+#include "../ext/rapidxml-1.13/rapidxml.hpp"
+#include "../ext/rapidxml-1.13/rapidxml_print.hpp"
 
 namespace gd {
     namespace decode {
@@ -189,7 +192,12 @@ namespace gd {
                 lvl = methods::fread(_path);
             else lvl = _lvl;
 
+        methods::perf::start();
+
             std::string data = decode::GetCCLocalLevels();
+        methods::perf::log("CC took");
+
+        methods::perf::start();
 
             data = std::regex_replace(data, std::regex (R"P(<k>k1<\/k><i>\d+?<\/i>)P"), "",
             std::regex_constants::match_any);
@@ -197,6 +205,9 @@ namespace gd {
             std::string second_half = data.substr(data.find("<k>_isArr</k><t />") + 18);
             std::string work = second_half;
             std::smatch sm;
+
+        methods::perf::log("Loading took");
+        methods::perf::start();
             while (std::regex_search(work, sm, std::regex ("<k>k_[0-9]+<\\/k>.*?<\\/d>.*?<\\/d>"))) {
                 std::string m = sm[0];
                 int i = std::stoi(m.substr(5, m.find("</") - 5)) + 1;
@@ -206,10 +217,53 @@ namespace gd {
 
                 work = work.substr(sm[0].length());
             }
+        methods::perf::log("Incrementing IDs took");
+        methods::perf::start();
             if (_name != "")
                 SetKey(&lvl, "k2", _name);
             data = first_half + "<k>_isArr</k><t /><k>k_0</k>" + lvl.substr(lvl.find("<d>")) + second_half;
             methods::fsave(decode::GetCCPath("LocalLevels"), data);
+        methods::perf::log("Saving took");
+
+            return GDIT_IMPORT_SUCCESS;
+        }
+
+        int ImportLevel_F(std::string _path, std::string _lvl = "", std::string _name = "") {
+            std::string lvl;
+            if (_lvl == "")
+                lvl = methods::fread(_path);
+            else lvl = _lvl;
+
+            if (_name != "")
+                SetKey(&lvl, "k2", _name);
+
+            std::string data = decode::GetCCLocalLevels();
+
+            rapidxml::xml_document<> cc;
+            cc.parse<0>(methods::stc(data));
+
+            rapidxml::xml_node<>* d = cc.first_node("plist")->first_node("dict")->first_node("d");
+            rapidxml::xml_node<>* fs = NULL;
+            for (rapidxml::xml_node<>* child = d->first_node(); child; child = child->next_sibling())
+                if (std::strcmp(child->name(), "k") == 0)
+                    if (std::string(child->value()).find("k_") != std::string::npos) {
+                        child->first_node()->value(methods::stc("k_" + std::to_string(std::stoi(std::string(child->value()).substr(2)) + 1)));
+                        if (fs == NULL) fs = child;
+                    }
+
+            rapidxml::xml_document<> lv;
+            lv.parse<0>(methods::stc(lvl));
+            rapidxml::xml_node<>* ln = lv.first_node();
+            rapidxml::xml_node<>* ld = lv.last_node();
+            rapidxml::xml_node<>* lnt = cc.clone_node(ln);
+            rapidxml::xml_node<>* ldt = cc.clone_node(ld);
+            lnt->first_node()->value("k_0");
+            d->insert_node(fs, lnt);
+            d->insert_node(fs, ldt);
+
+            std::string res;
+            rapidxml::print(std::back_inserter(res), cc, 0);
+            methods::fsave(decode::GetCCPath("LocalLevels"), res);
 
             return GDIT_IMPORT_SUCCESS;
         }
@@ -352,7 +406,7 @@ namespace gdit {
         methods::fsave(tp + "\\part_" + _creator + "\\" + name + "." + ext::main, nlohmann::json({
             { "name", gdname }
         }).dump());
-        gd::levels::ImportLevel(_path, "", gdname);
+        gd::levels::ImportLevel_F(_path, "", gdname);
         return GDIT_IMPORT_SUCCESS;
     }
 
@@ -513,47 +567,22 @@ namespace gdit {
         return GDIT_MERGE_SUCCESS;
     }
 
-    std::string ViewGditLevel(std::string _gdit) {
+    std::string ViewGditLevel(std::string _gdit, bool _og = false) {
         std::string dir = methods::workdir() + "\\" + app::dir::main + "\\" + _gdit + "\\master";
+        if (_og) {
+            std::string og = methods::fread(dir + "\\" + _gdit + ".master.og." + ext::level);
+            gd::levels::SetKey(&og, "k2", "view_og@" + _gdit);
+            gd::levels::ImportLevel_F("", og);
+            return "Added to your GD levels under the name view_og@" + _gdit;
+        }
         std::string base = methods::fread(dir + "\\" + _gdit + ".master." + ext::leveldata);
         nlohmann::json base_info = nlohmann::json::parse(methods::fread(dir + "\\" + _gdit + ".master." + ext::main));
 
         std::string lvl = "<k>k_0</k><d><k>kCEK</k><i>4</i><k>k2</k><s>view@"
-        + _gdit
-        + "</s><k>k4</k><s>"
-        + base
-        + "</s><k5>gdit</k5>" + base_info["song"].dump() + "</d>";
+        + _gdit + "</s><k>k4</k><s>" + base
+        + "</s><k5>gdit</k5><k>k13</k><t /><k>k21</k><i>2</i>" + base_info["song"].dump() + "</d>";
 
-        /*
-            <k>k_0</k>
-                <d>
-                    <k>kCEK</k>
-                    <i>4</i>
-                    <k>k2</k>
-                    <s>test</s>
-                    <k>k5</k>
-                    <s>HJfod</s>
-                    <k>k13</k>
-                    <t />
-                    <k>k21</k>
-                    <i>2</i>
-                    <k>k16</k>
-                    <i>1</i>
-                    <k>k50</k>
-                    <i>35</i>
-                    <k>kI1</k>
-                    <r>0</r>
-                    <k>kI2</k>
-                    <r>0</r>
-                    <k>kI3</k>
-                    <r>0</r>
-                    <k>kI6</k>
-                    <d />
-                </d>
-
-        //*/
-
-        gd::levels::ImportLevel("", lvl);
+        gd::levels::ImportLevel_F("", lvl);
 
         return "Added to your GD levels with the name view@" + _gdit;
     }

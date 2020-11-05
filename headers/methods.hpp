@@ -166,6 +166,30 @@ namespace methods {
             return _str.erase(s, _sub.length());
         else return _str;
     }
+
+    char* stc (std::string _str) {
+        int sz = _str.size() + 1;
+        char* cstr = new char[sz];
+        int err = strcpy_s(cstr, sz, _str.c_str());
+        return cstr;
+    }
+
+    namespace perf {
+        std::chrono::time_point<std::chrono::high_resolution_clock> perf_;
+
+        void start() {
+            perf_ = std::chrono::high_resolution_clock().now();
+        }
+
+        int end() {
+            auto end_ = std::chrono::high_resolution_clock().now();
+            return std::chrono::duration_cast<std::chrono::milliseconds>(end_ - perf_).count();
+        }
+
+        void log(std::string _text) {
+            std::cout << _text << "\t " << end() << "ms" << std::endl;
+        }
+    }
 }
 
 namespace console {

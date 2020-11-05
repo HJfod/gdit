@@ -134,7 +134,7 @@ namespace commands {
             } else std::cout << "GDit not found! (Are you not the megacollab host?)";
         }
 
-        void view(std::string _name = "") {
+        void view(std::string _name = "", std::string _flags = "") {
             std::string lvl;
             if (_name == "") {
                 std::vector<std::string> repos = gdit::GetAllRepos();
@@ -154,11 +154,11 @@ namespace commands {
 
             if (lvl == "") return;
             if (gdit::GditExists(lvl)) {
-                bool endan = false;
-                std::thread l = console::showload("Loading...", &endan);
-                gdit::ViewGditLevel(lvl);
-                endan = true;
-                l.join();
+                //bool endan = false;
+                //std::thread l = console::showload("Loading...", &endan);
+                gdit::ViewGditLevel(lvl, _flags.find("-og") != std::string::npos);
+                //endan = true;
+                //l.join();
                 std::cout << "Added to your GD levels!" << std::endl;
             } else std::cout << "gdit not found! Use \"gdit init <level>\" to create a gdit." << std::endl;
         }
@@ -183,8 +183,6 @@ namespace commands {
         std::vector<std::string> args;
         for (int i = 0; i < comc; i++)
             args.assign(com + 1, com + comc);
-
-        methods::fsave("ccl.txt", gd::decode::GetCCLocalLevels());
         
         if (args[0].find("\\", 0) != std::string::npos || args[0].find("/", 0) != std::string::npos) {
             if (methods::ewith(args[0], ext::level))
@@ -240,10 +238,17 @@ namespace commands {
                 break;
             case $("view"):
                 {
-                    g::view(comc < 3 ? "" : args[1]);
+                    g::view(comc < 3 ? "" : args[1], comc > 3 ? args[2] : "");
                 }
                 break;
             #pragma endregion merge
+            #pragma region debug
+            case $("debug_dcc"):
+                {
+                    methods::fsave(gd::decode::GetCCPath("LocalLevels"), gd::decode::GetCCLocalLevels());
+                }
+                break;
+            #pragma endregion debug
             #pragma region default
             default:
                 std::cout << "Unknown command. Use \"./gdit.exe help\" for a list of all commands." << std::endl;
