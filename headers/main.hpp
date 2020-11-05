@@ -3,6 +3,8 @@
 #include <direct.h>
 #include "methods.hpp"
 #include "../ext/json.hpp"
+#include "../ext/rapidxml-1.13/rapidxml.hpp"
+#include "../ext/rapidxml-1.13/rapidxml_print.hpp"
 
 namespace ext {
     const std::string main =        "gdit";
@@ -80,6 +82,6 @@ namespace app {
             }
         }
     }
-    std::string decoded_data;
+    rapidxml::xml_document<> decoded_data;
     std::vector<std::string> levels;
 }

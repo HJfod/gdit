@@ -12,8 +12,6 @@
 #include "../ext/Base64.hpp"
 #include "../ext/dirent.h"
 #include "../ext/json.hpp"
-#include "../ext/rapidxml-1.13/rapidxml.hpp"
-#include "../ext/rapidxml-1.13/rapidxml_print.hpp"
 
 namespace gd {
     namespace decode {
@@ -68,7 +66,7 @@ namespace gd {
 
             std::string c = methods::fread(CCPATH);
             if (c._Starts_with("<?xml version=\"1.0\"?>")) {
-                app::decoded_data = c;
+                app::decoded_data.parse<0>(methods::stc(c));
                 return c;
             }
 
@@ -77,15 +75,13 @@ namespace gd {
             std::vector<uint8_t> B64 = DecodeBase64(XOR);
             std::string ZLIB = DecompressGZip(B64);
 
-            app::decoded_data = ZLIB;
-
             return ZLIB;
         }
 
-        std::string GetCCLocalLevels() {
-            if (app::decoded_data.empty())
-                return DecodeCCLocalLevels();
-            return app::decoded_data;
+        rapidxml::xml_document<>* GetCCLocalLevels() {
+            if (app::decoded_data.first_node() == 0)
+                app::decoded_data.parse<0>(methods::stc(DecodeCCLocalLevels()));
+            return &app::decoded_data;
         }
 
         std::string DecodeLevelData(std::string _data) {
@@ -99,7 +95,11 @@ namespace gd {
                 std::regex m ("<k>k_[0-9]+<\\/k>.*?<\\/d>.*?<\\/d>");
                 std::smatch sm;
 
-                std::string RED = decode::GetCCLocalLevels();
+                rapidxml::xml_node<>* d = app::decoded_data.first_node("plist")->first_node("dict")->first_node("d");
+                rapidxml::xml_node<>* fs = NULL;
+                for (rapidxml::xml_node<>* child = d->first_node(); child; child = child->next_sibling())
+                    if (std::strcmp(child->name(), "d") == 0)
+                        
                 std::vector<std::string> LIST (1);
 
                 int i = 0;
@@ -237,12 +237,9 @@ namespace gd {
             if (_name != "")
                 SetKey(&lvl, "k2", _name);
 
-            std::string data = decode::GetCCLocalLevels();
+            decode::GetCCLocalLevels();
 
-            rapidxml::xml_document<> cc;
-            cc.parse<0>(methods::stc(data));
-
-            rapidxml::xml_node<>* d = cc.first_node("plist")->first_node("dict")->first_node("d");
+            rapidxml::xml_node<>* d = app::decoded_data.first_node("plist")->first_node("dict")->first_node("d");
             rapidxml::xml_node<>* fs = NULL;
             for (rapidxml::xml_node<>* child = d->first_node(); child; child = child->next_sibling())
                 if (std::strcmp(child->name(), "k") == 0)
@@ -255,14 +252,14 @@ namespace gd {
             lv.parse<0>(methods::stc(lvl));
             rapidxml::xml_node<>* ln = lv.first_node();
             rapidxml::xml_node<>* ld = lv.last_node();
-            rapidxml::xml_node<>* lnt = cc.clone_node(ln);
-            rapidxml::xml_node<>* ldt = cc.clone_node(ld);
+            rapidxml::xml_node<>* lnt = app::decoded_data.clone_node(ln);
+            rapidxml::xml_node<>* ldt = app::decoded_data.clone_node(ld);
             lnt->first_node()->value("k_0");
             d->insert_node(fs, lnt);
             d->insert_node(fs, ldt);
 
             std::string res;
-            rapidxml::print(std::back_inserter(res), cc, 0);
+            rapidxml::print(std::back_inserter(res), app::decoded_data, 0);
             methods::fsave(decode::GetCCPath("LocalLevels"), res);
 
             return GDIT_IMPORT_SUCCESS;
