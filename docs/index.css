@@ -1,0 +1,76 @@
+:root {
+    --bg-nav:           rgb(40, 38, 46);
+    --bg-main:          rgb(25, 24, 27);
+    --bg-head:          rgb(48, 46, 56);
+    --cl-text:          #fff;
+
+    --sz-nav:           15%;
+    --sz-head:          50px;
+    --sz-pad:           20px;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+body {
+    font-family: 'Open Sans';
+    color: var(--cl-text);
+    margin: 0px;
+    padding: 0px;
+}
+
+nav {
+    background-color: var(--bg-nav);
+    position: absolute;
+    width: var(--sz-nav);
+    height: 100%;
+    top: 0px;
+    left: 0px;
+}
+
+main {
+    background-color: var(--bg-main);
+    position: absolute;
+    width: calc(100% - var(--sz-nav));
+    height: 100%;
+    top: 0px;
+    left: var(--sz-nav);
+}
+
+article {
+    padding: var(--sz-pad);
+    width: calc( 100% - var(--sz-pad) * 2 );
+    height: calc( 100% - var(--sz-head)- var(--sz-pad) * 2  );
+    top: 0px;
+    left: 0px;
+    position: relative;
+    margin: 0px;
+}
+
+header {
+    background-color: var(--bg-head);
+    top: 0px;
+    left: 0px;
+    width: calc( 100% - var(--sz-head) );
+    height: var(--sz-head);
+    position: relative;
+    display: flex;
+    padding-left: var(--sz-head);
+    align-items: center;
+}
+
+@media only screen and (max-width: 600px) {
+    main {
+        width: 100%;
+        left: 0px;
+    }
+
+    nav {
+        display: none;
+    }
+
+    header {
+        justify-content: center;
+        width: 100%;
+        padding-left: 0px;
+    }
+}
