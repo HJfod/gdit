@@ -97,20 +97,11 @@ namespace gd {
 
                 rapidxml::xml_node<>* d = app::decoded_data.first_node("plist")->first_node("dict")->first_node("d");
                 rapidxml::xml_node<>* fs = NULL;
+                        
+                std::vector<rapidxml::xml_node<>*> LIST = {};
                 for (rapidxml::xml_node<>* child = d->first_node(); child; child = child->next_sibling())
                     if (std::strcmp(child->name(), "d") == 0)
-                        
-                std::vector<std::string> LIST (1);
-
-                int i = 0;
-                while (std::regex_search(RED, sm, m)) {
-                    LIST.resize(i + 1);
-                    LIST[i] = sm[0];
-
-                    i++;
-
-                    RED = RED.substr(sm[0].length() - 5);
-                }
+                        LIST.push_back(child);
 
                 app::levels = LIST;
             }
@@ -138,6 +129,10 @@ namespace gd {
                 int L1 = ("<k>" + KEY + "</k><" + T_TYPE + ">").length();
                 return VAL.substr(L1, VAL.find_last_of("</") - L1 - 1);
             }
+        }
+
+        std::string GetKey_X(rapidxml::xml_node<>* _lvl, std::string _key) {
+
         }
 
         std::string SetKey(std::string *_data, std::string _key, std::string _val) {
@@ -170,20 +165,15 @@ namespace gd {
             return DATA.substr(0, L1) + DATA.substr(VAL.find_last_of("</") - L1 - 1);
         }
 
-        std::string GetLevel(std::string _name, std::string *_err) {
+        rapidxml::xml_node<>* GetLevel(std::string _name, std::string *_err) {
             LoadLevels();
 
-            std::string LVL = "";
-
             for (int i = 0; i < app::levels.size(); i++)
-                if (methods::lower(GetKey(app::levels[i], "k2")) == methods::lower(_name))
-                    LVL = app::levels[i];
+                if (methods::lower(GetKey_X(app::levels[i], "k2")) == methods::lower(_name))
+                    return app::levels[i];
 
-            if (LVL == "")
-                *_err = "Could not find level! (Replace spaces in name with _)";
-            else return LVL;
-            
-            return "";
+            *_err = "Could not find level! (Replace spaces in name with _)";
+            return NULL;
         }
 
         int ImportLevel(std::string _path, std::string _lvl = "", std::string _name = "") {
@@ -228,7 +218,7 @@ namespace gd {
             return GDIT_IMPORT_SUCCESS;
         }
 
-        int ImportLevel_F(std::string _path, std::string _lvl = "", std::string _name = "") {
+        int ImportLevel_X(std::string _path, std::string _lvl = "", std::string _name = "") {
             std::string lvl;
             if (_lvl == "")
                 lvl = methods::fread(_path);
@@ -403,7 +393,7 @@ namespace gdit {
         methods::fsave(tp + "\\part_" + _creator + "\\" + name + "." + ext::main, nlohmann::json({
             { "name", gdname }
         }).dump());
-        gd::levels::ImportLevel_F(_path, "", gdname);
+        gd::levels::ImportLevel_X(_path, "", gdname);
         return GDIT_IMPORT_SUCCESS;
     }
 
@@ -569,7 +559,7 @@ namespace gdit {
         if (_og) {
             std::string og = methods::fread(dir + "\\" + _gdit + ".master.og." + ext::level);
             gd::levels::SetKey(&og, "k2", "view_og@" + _gdit);
-            gd::levels::ImportLevel_F("", og);
+            gd::levels::ImportLevel_X("", og);
             return "Added to your GD levels under the name view_og@" + _gdit;
         }
         std::string base = methods::fread(dir + "\\" + _gdit + ".master." + ext::leveldata);
@@ -579,7 +569,7 @@ namespace gdit {
         + _gdit + "</s><k>k4</k><s>" + base
         + "</s><k5>gdit</k5><k>k13</k><t /><k>k21</k><i>2</i>" + base_info["song"].dump() + "</d>";
 
-        gd::levels::ImportLevel_F("", lvl);
+        gd::levels::ImportLevel_X("", lvl);
 
         return "Added to your GD levels with the name view@" + _gdit;
     }

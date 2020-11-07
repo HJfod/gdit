@@ -83,5 +83,5 @@ namespace app {
         }
     }
     rapidxml::xml_document<> decoded_data;
-    std::vector<std::string> levels;
+    std::vector<rapidxml::xml_node<>*> levels;
 }
