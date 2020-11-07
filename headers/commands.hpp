@@ -35,9 +35,9 @@ namespace commands {
             gd::decode::GetCCLocalLevels();
 
             std::string err;
-            std::string lvl = gd::levels::GetLevel(level, &err);
+            rapidxml::xml_node<>* lvl = gd::levels::GetLevel(level, &err);
 
-            if (lvl == "")
+            if (lvl == NULL)
                 std::cout << err << std::endl;
             else {
                 std::string path = app::dir::main + "\\" + methods::lower(level_name);

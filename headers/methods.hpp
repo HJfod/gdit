@@ -10,6 +10,8 @@
 #include <conio.h>
 #include "errors.hpp"
 #include "../ext/dirent.h"
+#include "../ext/rapidxml-1.13/rapidxml.hpp"
+#include "../ext/rapidxml-1.13/rapidxml_print.hpp"
 
 namespace methods {
     std::string replace(std::string const& original, std::string const& from, std::string const& to) {
@@ -172,6 +174,12 @@ namespace methods {
         char* cstr = new char[sz];
         int err = strcpy_s(cstr, sz, _str.c_str());
         return cstr;
+    }
+
+    std::string xts (rapidxml::xml_node<>* _xml) {
+        std::string res;
+        rapidxml::print(std::back_inserter(res), *_xml, 0);
+        return res;
     }
 
     namespace perf {
