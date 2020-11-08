@@ -80,6 +80,8 @@ namespace gd {
 
         bool SaveCCLocalLevels() {
             methods::fsave(decode::GetCCPath("LocalLevels"), "<?xml version=\"1.0\"?>\n" + methods::xts(&app::decoded_data));
+
+            return true;
         }
 
         rapidxml::xml_document<>* GetCCLocalLevels() {
@@ -96,8 +98,7 @@ namespace gd {
     namespace levels {
         void LoadLevels() {
             if (app::levels.size() == 0) {
-                std::regex m ("<k>k_[0-9]+<\\/k>.*?<\\/d>.*?<\\/d>");
-                std::smatch sm;
+                gd::decode::GetCCLocalLevels();
 
                 rapidxml::xml_node<>* d = app::decoded_data.first_node("plist")->first_node("dict")->first_node("d");
                 rapidxml::xml_node<>* fs = NULL;
@@ -140,8 +141,11 @@ namespace gd {
             std::string n_k ("<k>" + std::string (_key) + "</k><" + std::string (_type) + ">" + std::string (_val) + "</" + std::string (_type) + ">");
             rapidxml::xml_document<> n;
             n.parse<0>(methods::stc(n_k));
-            _lvl->first_node()->append_node(n.first_node("k"));
-            _lvl->first_node()->append_node(n.first_node(_type));
+
+            rapidxml::xml_node<>* $k = _lvl->document()->clone_node(n.first_node("k"));
+            rapidxml::xml_node<>* $t = _lvl->document()->clone_node(n.first_node(_type));
+            _lvl->append_node($k);
+            _lvl->append_node($t);
             return true;
         }
 
@@ -181,15 +185,14 @@ namespace gd {
                 lvl = methods::fread(_path);
             else lvl = _lvl;
 
-            decode::GetCCLocalLevels();
+            gd::decode::GetCCLocalLevels();
 
             rapidxml::xml_node<>* d = app::decoded_data.first_node("plist")->first_node("dict")->first_node("d");
             rapidxml::xml_node<>* fs = NULL;
-            /*for (rapidxml::xml_node<>* child = d->first_node(); child; child = child->next_sibling()) {
+            for (rapidxml::xml_node<>* child = d->first_node(); child; child = child->next_sibling()) {
                 if (std::strcmp(child->name(), "k") == 0)
                     if (std::string(child->value()).find("k_") != std::string::npos) {
-                        //child->first_node()->value(methods::stc("k_" + std::to_string(std::stoi(std::string(child->value()).substr(2)) + 1)));
-                        std::cout << child->value() << "*";
+                        child->first_node()->value(methods::stc("k_" + std::to_string(std::stoi(std::string(child->value()).substr(2)) + 1)));
                         if (fs == NULL) fs = child;
                     }
             }
@@ -207,7 +210,6 @@ namespace gd {
 
             d->insert_node(fs, lk_ix);
             d->insert_node(fs, lnt);
-            */
 
             gd::decode::SaveCCLocalLevels();
 
@@ -363,6 +365,7 @@ namespace gdit {
     int CommitChanges(std::string _gdit, std::string* _out = NULL, bool _c_an = false) {
         if (app::settings::sval("username") == "")
             return GDIT_USERNAME_NOT_SET;
+
         std::string dir = methods::workdir() + "\\" + app::dir::main + "\\" + _gdit + "\\" + "part_" + app::settings::sval("username");
         
         std::string gd_name = methods::sanitize(nlohmann::json::parse(methods::fread(dir + "\\" + _gdit + "." + ext::main))["name"].dump());
@@ -521,6 +524,8 @@ namespace gdit {
     }
 
     std::string ViewGditLevel(std::string _gdit, bool _og = false) {
+        gd::decode::GetCCLocalLevels();
+
         std::string dir = methods::workdir() + "\\" + app::dir::main + "\\" + _gdit + "\\master";
         if (_og) {
             std::string og = methods::fread(dir + "\\" + _gdit + ".master.og." + ext::level);
@@ -531,11 +536,10 @@ namespace gdit {
         std::string base = methods::fread(dir + "\\" + _gdit + ".master." + ext::leveldata);
         nlohmann::json base_info = nlohmann::json::parse(methods::fread(dir + "\\" + _gdit + ".master." + ext::main));
 
-        std::string lvl = "<k>k_0</k><d><k>kCEK</k><i>4</i><k>k2</k><s>view@"
-        + _gdit + "</s><k>k4</k><s>" + base
+        std::string lvl = "<d><k>kCEK</k><i>4</i><k>k4</k><s>" + base
         + "</s><k5>gdit</k5><k>k13</k><t /><k>k21</k><i>2</i>" + base_info["song"].dump() + "</d>";
 
-        gd::levels::ImportLevel_X("", lvl);
+        gd::levels::ImportLevel_X("", lvl, "view@" + _gdit);
 
         return "Added to your GD levels with the name view@" + _gdit;
     }

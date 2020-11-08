@@ -66,7 +66,7 @@ namespace app {
         std::string all() {
             std::string ret;
             for (setting s : settings)
-                ret += s.name + "\n";
+                ret += s.name + std::string(20 - s.name.length(), ' ') + "\t" + (s.val == "" ? "<No value set>" : s.val) + "\n";
             return ret;
         }
         

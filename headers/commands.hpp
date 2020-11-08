@@ -18,11 +18,11 @@ namespace commands {
                 std::cin >> u;
                 app::settings::sset("username", u);
             }
-            //bool endan = false;
-            //std::thread l = console::showload("Importing...", &endan);
+            bool endan = false;
+            std::thread l = console::showload("Importing...", &endan);
             int x = gdit::AddGditPart(_path, app::settings::sval("username"));
-            //endan = true;
-            //l.join();
+            endan = true;
+            l.join();
             if (x == GDIT_IMPORT_SUCCESS)
                 std::cout << "Succesfully imported part! You can now start working on it :)" << std::endl << "NOTE: DO *NOT* CHANGE THE NAME OF THE LEVEL." << std::endl;
             else std::cout << "Error: " << x << std::endl;
@@ -167,7 +167,7 @@ namespace commands {
             if (_var == "")
                 std::cout << "Usage: setup <variable> [<value>]" << std::endl << "Variables:\n" << app::settings::all();
             else if (_val == "")
-                std::cout << app::settings::sval(_var) << std::endl;
+                std::cout << (app::settings::sval(_var) == "" ? "<No value set>" : app::settings::sval(_var)) << std::endl;
             else
                 if (app::settings::sset(_var, _val) != GDIT_SETTING_UPDATE_SUCCESS)
                     std::cout << "Unable to update setting!" << std::endl;
@@ -225,7 +225,7 @@ namespace commands {
             #pragma region setup
             case $("setup"):
                 {
-                    g::setup(comc < 3 ? "" : args[1], comc > 3 ? "" : args[2]);
+                    g::setup(comc < 3 ? "" : args[1], comc < 4 ? "" : args[2]);
                 }
                 break;
             #pragma endregion setup
