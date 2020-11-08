@@ -182,6 +182,12 @@ namespace methods {
         return res;
     }
 
+    std::string xts (rapidxml::xml_document<>* _xml) {
+        std::string res;
+        rapidxml::print(std::back_inserter(res), *_xml, 0);
+        return res;
+    }
+
     namespace perf {
         std::chrono::time_point<std::chrono::high_resolution_clock> perf_;
 

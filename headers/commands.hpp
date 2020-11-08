@@ -18,11 +18,11 @@ namespace commands {
                 std::cin >> u;
                 app::settings::sset("username", u);
             }
-            bool endan = false;
-            std::thread l = console::showload("Importing...", &endan);
+            //bool endan = false;
+            //std::thread l = console::showload("Importing...", &endan);
             int x = gdit::AddGditPart(_path, app::settings::sval("username"));
-            endan = true;
-            l.join();
+            //endan = true;
+            //l.join();
             if (x == GDIT_IMPORT_SUCCESS)
                 std::cout << "Succesfully imported part! You can now start working on it :)" << std::endl << "NOTE: DO *NOT* CHANGE THE NAME OF THE LEVEL." << std::endl;
             else std::cout << "Error: " << x << std::endl;
@@ -245,7 +245,12 @@ namespace commands {
             #pragma region debug
             case $("debug_dcc"):
                 {
-                    //methods::fsave(gd::decode::GetCCPath("LocalLevels"), gd::decode::GetCCLocalLevels());
+                    methods::fsave("ccl.txt", gd::decode::DecodeCCLocalLevels());
+                }
+                break;
+            case $("debug_dcc_xml"):
+                {
+                    methods::fsave("ccl.txt", methods::xts(gd::decode::GetCCLocalLevels()));
                 }
                 break;
             #pragma endregion debug
