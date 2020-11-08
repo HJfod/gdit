@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GDit Basic Usage</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="index.css">
+        <script src="index.js" defer></script>
+    </head>
+    <body>
+        <main>
+            <header>GDit Basic Usage</header>
+            <article>
+                <section>
+                    <cite>Basic Usage</cite>
+                    <hr>
+                    <details>
+                        <summary>Setting up a GDit Project</summary>
+                        <h2>Setting up a GDit Project</h2>
+                        <code><ins>./gdit.exe</ins> init <em>some_level_name</em></code><br><br>
+                        <text>To set up a new GDit project, type in the name of the level.</text><br><br>
+                        <strong>The level you init a GDit from should ideally be the base layout.
+                        It can <b>not</b> be changed after initialization.</strong>
+                        <br><br><hr>
+                        <code><ins>./gdit.exe</ins> get <em>gdit_name</em></code><br><br>
+                        <text>After initialization, you need to run the <em>get</em> command to get the GDit part.</text><br>
+                        <text>This will place the file to your <em>copies/</em> folder, from where you can send it to your collab participants.</text>
+                        <br><br><hr>
+                        <code><ins>./gdit.exe</ins> <em>C:/Path/To/File.gditl</em></code><br><br>
+                        <text>After sending the file to your collab creators, they can start working on it by running this command.</text>
+                        <br><br>
+                        <strong>Replace "C:/Path/To/File.gditl" with the path to the actual file you were sent.<br>
+                        You can automatically copy the path by <em>Shift + Right-Clicking</em> the file in File Explorer and
+                        selecting <em>"Copy As Path"</em></strong>
+                    </details>
+                    <details>
+                        <summary>Saving your changes</summary>
+                        <h2>Saving your changes</h2>
+                        <code><ins>./gdit.exe</ins> commit <em>gdit_part_name</em></code><br><br>
+                        <text>Committing checks what objects you have added / removed and adds them to a new <em>commit file</em>.</text><br><br>
+                        <strong>Do not delete commit files.</strong>
+                    </details>
+                    <details>
+                        <summary>Merging</summary>
+                        <h2>Merging</h2>
+                        <code><ins>./gdit.exe</ins> merge <em>path_to_commit</em></code><br><br>
+                        <strong><b>Merge is not fully finished yet.</b> If you want to use it, you have to merge every commit individually.
+                        <br><br>
+                        Also, there are some features missing:
+                        <ul>
+                            <li>Automatic group & colour reassign</li>
+                        </ul></strong>
+                    </details>
+                </section>
+            </article>
+        </main>
+        <nav id="main-nav"></nav>
+    </body>
+</html>

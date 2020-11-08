@@ -2,11 +2,28 @@
     --bg-nav:           rgb(40, 38, 46);
     --bg-main:          rgb(25, 24, 27);
     --bg-head:          rgb(48, 46, 56);
+    --bg-sec:           rgb(145, 195, 255);
+    --bg-warn:          rgba(98, 46, 56, .4);
+
     --cl-text:          #fff;
+    --cl-hover:         rgba(68, 66, 76, .5);
+    --cl-select:        rgba(68, 66, 76, 1);
+    --cl-break:         rgba(255, 255, 255, .2);
+    --cl-cont:          rgba(0, 0, 0, .2);
+    --cl-code:          rgba(150, 255, 187);
+    --cl-shadow:        rgba(0, 0, 0, .5);
 
     --sz-nav:           15%;
+    --sz-nav-button:    40px;
     --sz-head:          50px;
     --sz-pad:           20px;
+    --sz-side:          10px;
+    --sz-break:         2px;
+    --sz-cont-corn:     8px;
+    --sz-cont-bord:     2px;
+    --sz-shadow:        10px;
+
+    --trans:            .1s;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
@@ -25,6 +42,9 @@ nav {
     height: 100%;
     top: 0px;
     left: 0px;
+    display: flex;
+    flex-direction: column;
+    z-index: 7;
 }
 
 main {
@@ -34,13 +54,15 @@ main {
     height: 100%;
     top: 0px;
     left: var(--sz-nav);
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 article {
     padding: var(--sz-pad);
     width: calc( 100% - var(--sz-pad) * 2 );
     height: calc( 100% - var(--sz-head)- var(--sz-pad) * 2  );
-    top: 0px;
+    top: var(--sz-head);
     left: 0px;
     position: relative;
     margin: 0px;
@@ -49,13 +71,171 @@ article {
 header {
     background-color: var(--bg-head);
     top: 0px;
-    left: 0px;
-    width: calc( 100% - var(--sz-head) );
+    left: var(--sz-nav);
+    width: calc( 100% - var(--sz-head) - var(--sz-nav) );
     height: var(--sz-head);
-    position: relative;
+    position: fixed;
     display: flex;
     padding-left: var(--sz-head);
     align-items: center;
+    box-shadow: 0px 0px var(--sz-shadow) var(--cl-shadow);
+    z-index: 5;
+}
+
+cite {
+    font-size: 2rem;
+    font-style: normal;
+    display: block;
+    margin-top: var(--sz-pad);
+}
+
+main cite:first-child {
+    margin-top: 0px;
+}
+
+hr {
+    position: relative;
+    width: 100%;
+    height: var(--sz-break);
+    background-color: var(--cl-break);
+    border: none;
+    margin-bottom: var(--sz-pad);
+}
+
+img {
+    max-width: 100%;
+}
+
+details summary {
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: var(--sz-pad);
+}
+
+details[open] summary ~ * {
+    animation: sweep var(--trans) ease-in-out;
+}
+
+details[open] {
+    margin-bottom: var(--sz-pad);
+}
+  
+@keyframes sweep {
+    0%    {opacity: 0; margin-left: -10px}
+    100%  {opacity: 1; margin-left: 0px}
+}
+
+strong {
+    font-style: normal;
+    font-weight: normal;
+    background-color: var(--bg-warn);
+    padding: var(--sz-pad);
+    border-radius: var(--sz-cont-corn);
+    border: var(--sz-cont-bord) solid var(--bg-warn);
+    display: inline-block;
+}
+
+em {
+    color: var(--bg-sec);
+    font-style: normal;
+}
+
+ins {
+    opacity: .6;
+    font-style: normal;
+    text-decoration: none;
+}
+
+ul {
+    list-style: none;
+    margin: 0px;
+}
+
+ul li::before {
+    content: "•";
+    color: var(--cl-text);
+    opacity: .3;
+    display: inline-block;
+    width: 1em;
+    margin-left: -2em;
+}
+
+ol {
+    list-style: none;
+    counter-reset: li;
+    margin: 0px;
+}
+
+ol li::before {
+    content: counter(li);
+    color: var(--cl-text);
+    opacity: .3;
+    display: inline-block;
+    width: 1em;
+    margin-left: -2em;
+}
+
+ol li {
+    counter-increment: li;
+    margin-left: -.5em;
+    margin-bottom: .2em;
+    margin-top: .2em;
+}
+
+a {
+    font-family: 'Open Sans';
+    color: var(--bg-sec);
+    text-decoration: underline;
+}
+
+code {
+    background-color: var(--cl-cont);
+    border-radius: var(--sz-cont-corn);
+    border: var(--sz-cont-bord) solid var(--cl-cont);
+    padding: var(--sz-pad);
+    color: var(--cl-code);
+    display: inline-block;
+}
+
+.cont {
+    background-color: var(--cl-cont);
+    border-radius: var(--sz-cont-corn);
+    border: var(--sz-cont-bord) solid var(--cl-cont);
+    padding: var(--sz-pad);
+    display: inline-block;
+}
+
+.nav-button {
+    width: 100%;
+    height: var(--sz-nav-button);
+    border: none;
+    background-color: rgba(0,0,0,0);
+    transition-duration: var(--trans);
+    font-family: 'Open Sans';
+}
+
+.nav-button:hover:not(.nav-selected) {
+    background-color: var(--cl-hover);
+}
+
+.nav-button.nav-selected {
+    background-color: var(--cl-select);
+}
+
+.nav-button::after {
+    content: "";
+    opacity: 0;
+    transition-duration: var(--trans);
+}
+
+.nav-button:hover::after {
+    content: ">>";
+    text-align: right;
+    float: right;
+    padding-right: var(--sz-side);
+    display: inline;
+    color: var(--bg-sec);
+    opacity: 1;
 }
 
 @media only screen and (max-width: 600px) {
