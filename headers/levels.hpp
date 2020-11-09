@@ -498,6 +498,8 @@ namespace gdit {
         std::string base = methods::fread(dir + "\\" + name + ".master." + ext::leveldata);
         std::string commit = methods::fread(_part_path);
 
+        // COMMIT NEEDS TO INCLUDE THE START KEY'S COLOUR CHANNELS
+
         std::string base_data;
         if (base._Starts_with("H4sIAAAA")) {
             base_data = gd::decode::DecodeLevelData(base);
@@ -518,7 +520,7 @@ namespace gdit {
             add += methods::sanitize(obj) + ";";
         base_data += add;
 
-        methods::fsave(dir + "\\" + name + ".master." + ext::leveldata, base_data);
+        //methods::fsave(dir + "\\" + name + ".master." + ext::leveldata, base_data);
 
         return GDIT_MERGE_SUCCESS;
     }
