@@ -125,13 +125,27 @@ namespace commands {
         }
 
         void merge(std::string _part) {
-            if (gdit::GditExists(gdit::GetGDitNameFromCommit(_part))) {
+            if (_part == "") return;
+            
+            std::vector<std::string> parts;
+            if (methods::ewith(_part, ext::commit)) parts = { _part };
+            else parts = methods::dall(_part);
+
+            std::string name = gdit::GetGDitNameFromCommit(parts[0]);
+            if (!gdit::GditExists(name)) {
+                std::cout << "GDit not found! (Are you not the megacollab host?)" << std::endl;
+                return;
+            }
+
+            for (std::string part : parts) {
+                if (gdit::GetGDitNameFromCommit(part) != name) continue;
+
                 int m = gdit::MergeCommit(_part);
                 
                 if (m == GDIT_MERGE_SUCCESS)
                     std::cout << "Succesfully merged!" << std::endl;
                 else std::cout << "Error merging: " << m << std::endl;
-            } else std::cout << "GDit not found! (Are you not the megacollab host?)";
+            }
         }
 
         void view(std::string _name = "", std::string _flags = "") {
@@ -233,7 +247,7 @@ namespace commands {
             case $("merge"):
                 {
                     if (comc < 3) std::cout << "You need to supply a path to a ." << ext::commit << " file to merge!" << std::endl;
-                    else g::merge(args[1]);
+                    else g::merge((args[1] == "from" ? (comc < 4 ? "" : args[2]) : args[1]));
                 }
                 break;
             case $("view"):

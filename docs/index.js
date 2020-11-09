@@ -35,3 +35,22 @@ document.getElementById("main-nav").innerHTML += "<footer><text>GDit © HJfod 20
 if (document.querySelector("#license-text") != null)
     fetch("https://raw.githubusercontent.com/HJfod/gdit/master/LICENSE").then(res => res.text().then(t =>
         document.querySelector("#license-text").innerHTML = t.replace(/\n/g, "<br>")));
+
+document.querySelectorAll("table-from").forEach(t => {
+    const j = JSON.parse(t.getAttribute("from"));
+
+    const ta = document.createElement("table");
+    for (let i = 0; i < j[0].length; i++) {
+        const tr = document.createElement("td");
+        j.forEach(jj => {
+            const td = document.createElement("tr");
+            td.innerHTML = jj[i];
+            tr.appendChild(td);
+        });
+        ta.appendChild(tr);
+    }
+
+    t.parentNode.insertBefore(ta, t);
+
+    t.remove();
+});
