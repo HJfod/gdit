@@ -12,11 +12,11 @@
 
 ## Usage
 
-[See Usage](file:///D:/github/gdit/docs/usage.html)
+[See Usage](hjfod.github.io/gdit/usage.html)
 
 ## Documentation
 
-[See Documentation](file:///D:/github/gdit/docs/docs.html)
+[See Documentation](hjfod.github.io/gdit/docs.html)
 
 ## TODO
 
