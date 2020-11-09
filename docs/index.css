@@ -29,6 +29,10 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
 
+* {
+    outline: none;
+}
+
 body {
     font-family: 'Open Sans';
     color: var(--cl-text);
@@ -95,6 +99,7 @@ header {
     width: var(--sz-head);
     font-size: 1.5rem;
     transition-duration: var(--trans);
+    color: var(--cl-text);
 }
 
 .nav-toggle:hover {
