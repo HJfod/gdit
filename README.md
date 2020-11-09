@@ -12,11 +12,11 @@
 
 ## Usage
 
-[See Usage](hjfod.github.io/gdit/usage.html)
+[See Usage](https://hjfod.github.io/gdit/usage.html)
 
 ## Documentation
 
-[See Documentation](hjfod.github.io/gdit/docs.html)
+[See Documentation](https://hjfod.github.io/gdit/docs.html)
 
 ## TODO
 
