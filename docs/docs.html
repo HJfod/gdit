@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GDit Documentation</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <link rel="stylesheet" href="index.css">
+        <script src="index.js" defer></script>
+    </head>
+    <body>
+        <nav id="main-nav"></nav>
+        <main>
+            <header><text>GDit Documentation</text></header>
+            <article>
+                <section>
+                    <cite>Documentation</cite>
+                    <hr>
+                    <details>
+                        <summary>Initialize GDit</summary>
+                        <code>init &lt;level-name&gt;</code>
+                        <br><br>
+                        <text>Initialize a new GDit out of the level specified.</text>
+                    </details>
+                    <details>
+                        <summary>Get layout</summary>
+                        <code>get [&lt;path/to/commit&gt;]</code>
+                        <br><br>
+                        <text>Get the layout from the GDit specified, or select a GDit to get the layout from.</text>
+                    </details>
+                    <details>
+                        <summary>Commit changes</summary>
+                        <code>commit [&lt;level-name&gt;] [-flags]</code>
+                        <br><br>
+                        <text>Commit changes to a GDit part.</text>
+                        <br><br>
+                        <div class="cont">
+                            <text>Flags</text>
+                            <ul>
+                                <li><em>create</em>: Doesn't work lol</li>
+                            </ul>
+                        </div>
+                    </details>
+                    <details>
+                        <summary>Reset changes</summary>
+                        <code>com_reset &lt;gdit-name&gt;</code>
+                        <br><br>
+                        <text>Reset all commits made to a part.</text>
+                    </details>
+                    <details>
+                        <summary>Setup</summary>
+                        <code>setup [&lt;variable&gt;] [&lt;value&gt;]</code>
+                        <br><br>
+                        <text>Set/get an user variable.</text>
+                    </details>
+                    <details>
+                        <summary>View level</summary>
+                        <code>view [&lt;gdit-name&gt;] [-flags]</code>
+                        <br><br>
+                        <text>View the current master work level.</text>
+                        <br><br>
+                        <div class="cont">
+                            <text>Flags</text>
+                            <ul>
+                                <li><em>og</em>: Get the original layout.</li>
+                            </ul>
+                        </div>
+                    </details>
+                    <details>
+                        <summary>Merge part</summary>
+                        <code>merge &lt;path/to/commit&gt;</code>
+                        <br><br>
+                        <text>Merge the commit to the master work level.</text>
+                    </details>
+                </section>
+            </article>
+        </main>
+    </body>
+</html>

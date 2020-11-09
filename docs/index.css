@@ -24,6 +24,7 @@
     --sz-shadow:        10px;
 
     --trans:            .1s;
+    --trans-slow:       .5s;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
@@ -33,6 +34,8 @@ body {
     color: var(--cl-text);
     margin: 0px;
     padding: 0px;
+    background-color: var(--bg-main);
+    overflow: hidden;
 }
 
 nav {
@@ -45,6 +48,7 @@ nav {
     display: flex;
     flex-direction: column;
     z-index: 7;
+    transition-duration: var(--trans-slow);
 }
 
 main {
@@ -56,6 +60,7 @@ main {
     left: var(--sz-nav);
     overflow-x: hidden;
     overflow-y: auto;
+    transition-duration: var(--trans-slow);
 }
 
 article {
@@ -72,14 +77,28 @@ header {
     background-color: var(--bg-head);
     top: 0px;
     left: var(--sz-nav);
-    width: calc( 100% - var(--sz-head) - var(--sz-nav) );
+    width: calc( 100% - var(--sz-pad) - var(--sz-nav) );
     height: var(--sz-head);
     position: fixed;
     display: flex;
-    padding-left: var(--sz-head);
+    padding-left: var(--sz-pad);
     align-items: center;
     box-shadow: 0px 0px var(--sz-shadow) var(--cl-shadow);
     z-index: 5;
+    transition-duration: var(--trans-slow);
+}
+
+.nav-toggle {
+    border: none;
+    background-color: rgba(0, 0, 0, 0);
+    height: var(--sz-head);
+    width: var(--sz-head);
+    font-size: 1.5rem;
+    transition-duration: var(--trans);
+}
+
+.nav-toggle:hover {
+    background-color: var(--cl-hover);
 }
 
 cite {
@@ -89,7 +108,7 @@ cite {
     margin-top: var(--sz-pad);
 }
 
-main cite:first-child {
+main cite:first-of-type {
     margin-top: 0px;
 }
 
@@ -239,20 +258,74 @@ code {
     opacity: 1;
 }
 
+nav[off] {
+    opacity: 0;
+    width: 0px;
+    pointer-events: none;
+}
+
+nav[off] ~ main {
+    width: 100%;
+    left: 0px;
+}
+
+nav[off] ~ main header {
+    width: 100%;
+    left: 0px;
+}
+
+nav footer {
+    width: 100%;
+    height: var(--sz-nav-button);
+    display: flex;
+    align-self: flex-end;
+    margin-top: auto;
+    margin-bottom: 0px;
+    justify-content: center;
+    align-items: center;
+    font-size: .8rem;
+    color: var(--cl-text);
+    opacity: .5;
+}
+
 @media only screen and (max-device-width: 480px) {
+    :root {
+        --sz-nav:       80%;
+    }
+
     main {
         width: 100%;
         left: 0px;
     }
 
     nav {
-        display: none;
+        left: calc(0px - var(--sz-nav));
+        top: var(--sz-head);
+        width: var(--sz-nav);
+        height: calc(100% - var(--sz-head));
+        border: 0px 0px var(--sz-shadow) var(--cl-shadow);
+    }
+
+    nav[off] {
+        left: 0px;
+        opacity: 1;
+        width: var(--sz-nav);
+        pointer-events: initial;
     }
 
     header {
         justify-content: center;
         width: 100%;
         padding-left: 0px;
+        left: 0px;
+    }
+
+    .nav-toggle {
+        float: left;
+        align-self: left;
+        justify-self: left;
+        position: absolute;
+        top: 0px;
         left: 0px;
     }
 }
