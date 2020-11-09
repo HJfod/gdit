@@ -210,6 +210,7 @@ code {
     height: var(--sz-nav-button);
     border: none;
     background-color: rgba(0,0,0,0);
+    color: var(--cl-text);
     transition-duration: var(--trans);
     font-family: 'Open Sans';
 }
@@ -238,7 +239,7 @@ code {
     opacity: 1;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-device-width: 480px) {
     main {
         width: 100%;
         left: 0px;
@@ -252,5 +253,6 @@ code {
         justify-content: center;
         width: 100%;
         padding-left: 0px;
+        left: 0px;
     }
 }
