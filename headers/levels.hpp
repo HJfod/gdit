@@ -564,6 +564,14 @@ namespace gdit {
         int b = commit.find("\nDATA ") + 6;
         nlohmann::json j = nlohmann::json::parse(commit.substr(commit.find_first_of("\n", b) + 1));
 
+        methods::range_super available_colors = { 0, 1500 };
+
+        methods::range forbidden_colors = { 1000, 1012 };
+        for (nlohmann::json s_c : j["start_color"]) {
+            if (!forbidden_colors.contains(s_c["id"]))
+                std::cout << std::endl << s_c["id"] << std::endl;
+        }
+
         for (std::string obj : j["removed"])
             base_data = methods::remove(base_data, obj + ";", false);
         

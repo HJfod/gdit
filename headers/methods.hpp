@@ -204,6 +204,36 @@ namespace methods {
             std::cout << _text << "\t " << end() << "ms" << std::endl;
         }
     }
+
+    struct range {
+        int start;
+        int end;
+        bool contains(int _n) {
+            return (_n >= start && _n <= end);
+        }
+    };
+
+    struct range_col {
+        void in();
+    };
+
+    struct range_super {
+        // stored as 11-bit ints.
+        // since fucking no one (except maybe akira kurisu) is going to use over 2000 colors.
+        // i'm too lazy to figure out how to store 11-bit ints in c++ though, so let's just not bother.
+
+        unsigned short start, end;
+        range_col excluded;
+        bool contains(unsigned short _n) {
+            return (_n >= start && _n <= end) && (excluded.contains());
+        }
+    };
+
+    struct range_col {
+        void in() {
+            
+        }
+    }
 }
 
 namespace console {
