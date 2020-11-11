@@ -5,11 +5,14 @@
 #include <vector>
 #include "headers.hpp"
 
+// hash function for strings, turns a string into an integrer, used for switch statements
 constexpr unsigned int $(const char* str, int h = 0) {
     return !str[h] ? 5381 : ($(str, h+1) * 33) ^ str[h];
 }
 
 namespace commands {
+    // dont ask why this namespace is called "g". i couldnt figure out a better name
+    // it contains all the commands
     namespace g {
         void import(std::string _path) {
             if (app::settings::sval("username") == "") {
@@ -188,21 +191,27 @@ namespace commands {
                 else std::cout << "Succesfully updated setting!" << std::endl;
         }
     }
-
+    
+    // check command line args and call appropiate commands
     void parse(int comc, char* com[]) {
+        // check if no args were supplied
         if (comc < 2) {
             std::cout << "Use \"./gdit.exe help\" for help." << std::endl;
             return;
         }
+
+        // put all args in a vector with the first one (./gdit.exe) removed
         std::vector<std::string> args;
         for (int i = 0; i < comc; i++)
             args.assign(com + 1, com + comc);
         
+        // check if supplied arg is a path to a gdit level file
         if (args[0].find("\\", 0) != std::string::npos || args[0].find("/", 0) != std::string::npos) {
             if (methods::ewith(args[0], ext::level))
                 g::import(args[0]);
-        } else
+        } else // otherwise check by first arg
         switch ($(methods::lower(args[0]).c_str())) {
+            // these are split into regions, some regions like commit contain handling for multiple different commands
             #pragma region init
             case $("init"):
                 {
@@ -229,9 +238,21 @@ namespace commands {
                 {
                     if (comc < 3) std::cout << "You need to supply a gdit part to erase commits in!" << std::endl;
                     else {
+                        // g is just a quick variable to check the return value
                         int g = gdit::ResetCommits(args[1]);
                         if (g == GDIT_COMMIT_SUCCESS) std::cout << "Succesfully reset commits!";
                         else std::cout << "Error resetting: " << g << std::endl;
+                    }
+                }
+                break;
+            case $("edit"):
+                {
+                    if (comc < 3) std::cout << "You need to supply a gdit part to edit!" << std::endl;
+                    else {
+                        // g is just a quick variable to check the return value
+                        int g = gdit::EditPart(args[1]);
+                        if (g == GDIT_SUCCESS) std::cout << "Added part to levels!";
+                        else std::cout << "Error: " << g << std::endl;
                     }
                 }
                 break;
@@ -259,11 +280,13 @@ namespace commands {
             #pragma region debug
             case $("debug_dcc"):
                 {
+                    // save cclocallevels to a file
                     methods::fsave("ccl.txt", gd::decode::DecodeCCLocalLevels());
                 }
                 break;
             case $("debug_dcc_xml"):
                 {
+                    // save cclocallevels w/ xml formatting to a file
                     methods::fsave("ccl.txt", methods::xts(gd::decode::GetCCLocalLevels()));
                 }
                 break;

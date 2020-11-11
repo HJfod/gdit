@@ -9,10 +9,12 @@
 
 int main(int argc, char *argv[]) {
     //_setmode(_fileno(stdout), _O_U16TEXT);
-
+    
+    // load settings and create required directories
     app::settings::load();
     app::dir::init();
 
+    // handle command line input
     commands::parse(argc, argv);
 
     #ifdef GUI

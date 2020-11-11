@@ -225,6 +225,25 @@ namespace gd {
             std::vector<gd_obj> objs;
         };
 
+        struct gd_color {
+            unsigned int id;
+            std::string data;
+        };
+
+        struct start_obj {
+            std::vector<gd_color> colors;
+
+            nlohmann::json get_data() {
+                nlohmann::json j = nlohmann::json::array();
+                for (gd_color c : this->colors)
+                    j.push_back({
+                        { "id", c.id },
+                        { "data", c.data }
+                    });
+                return j;
+            };
+        };
+
         std::vector<gd_obj> GetObjects(std::string _decoded_data, std::vector<obj_group>* _ordered = NULL) {
             std::string d = _decoded_data.substr(_decoded_data.find(";") + 1);
             std::vector<gd_obj> res = {};
@@ -248,6 +267,21 @@ namespace gd {
                 }
             }
             *_ordered = orres;
+            return res;
+        }
+
+        start_obj GetStartKey(std::string _decoded_data) {
+            std::string s = _decoded_data.substr(0, _decoded_data.find_first_of(";"));
+            s = s.substr(s.find_first_of("kS38,") + 5);
+            s = s.substr(0, s.find_first_of(","));
+            start_obj res = { {} };
+            for (std::string ss : methods::split(s, "|")) {
+                std::vector<std::string> sss = methods::split(ss, "_");
+                for (int i = 0; i < sss.size(); i += 2)
+                    if (sss[i] == "6")
+                        res.colors.push_back({ std::stoul(sss[i + 1]), ss });
+            }
+
             return res;
         }
     }
@@ -362,6 +396,22 @@ namespace gdit {
         return GDIT_IMPORT_SUCCESS;
     }
 
+    int EditPart(std::string _gdit) {
+        if (app::settings::sval("username") == "")
+            return GDIT_USERNAME_NOT_SET;
+
+        std::string dir = methods::workdir() + "\\" + app::dir::main + "\\" + _gdit + "\\" + "part_" + app::settings::sval("username");
+        std::string gd_name = methods::sanitize(nlohmann::json::parse(methods::fread(dir + "\\" + _gdit + "." + ext::main))["name"].dump());
+        std::string data = methods::fread(dir + "\\" + _gdit + ".work." + ext::level);
+
+        if (data == "")
+            return GDIT_PART_WORK_LEVEL_NOT_FOUND;
+        
+        gd::levels::ImportLevel_X("", data, gd_name);
+
+        return GDIT_SUCCESS;
+    }
+
     int CommitChanges(std::string _gdit, std::string* _out = NULL, bool _c_an = false) {
         if (app::settings::sval("username") == "")
             return GDIT_USERNAME_NOT_SET;
@@ -397,12 +447,15 @@ namespace gdit {
 
         std::vector<std::string> obj_removed = {};
         std::vector<std::string> obj_added = {};
+        gd::levels::start_obj obj_start = {};
 
         if (!skip) {
             std::vector<gd::levels::obj_group> objs = {};
             std::string dec_og = gd::decode::DecodeLevelData(og_k4);
             std::string dec_new= gd::decode::DecodeLevelData(new_k4);
-            std::vector<gd::levels::gd_obj> new_obj = gd::levels::GetObjects(gd::decode::DecodeLevelData(og_k4), &objs);
+            std::vector<gd::levels::gd_obj> new_obj = gd::levels::GetObjects(dec_og, &objs);
+
+            obj_start = gd::levels::GetStartKey(dec_new);
             
             /*
             for (gd::levels::obj_group gr : objs) {
@@ -456,6 +509,7 @@ namespace gdit {
         nlohmann::json ij;
         ij["type"] = GDIT_COMMIT_VERSION;
         ij["gdit_name"] = _gdit;
+        ij["start_color"] = obj_start.get_data();
         ij["added"] = obj_added;
         ij["removed"] = obj_removed;
         output_file += "VERSION " + methods::sanitize(ij["type"].dump()) + "\n";
@@ -497,8 +551,6 @@ namespace gdit {
         
         std::string base = methods::fread(dir + "\\" + name + ".master." + ext::leveldata);
         std::string commit = methods::fread(_part_path);
-
-        // COMMIT NEEDS TO INCLUDE THE START KEY'S COLOUR CHANNELS
 
         std::string base_data;
         if (base._Starts_with("H4sIAAAA")) {
