@@ -213,14 +213,14 @@ namespace methods {
         }
     };
 
-    namespace range {
+    namespace range_ {
         struct sup {
             // ideally, this should be stored as 11-bit ints.
             // since fucking no one (except maybe akira kurisu) is going to use over 2000 colors.
             // i'm too lazy to figure out how to properly work with 11-bit ints in c++ though, so let's just not bother.
             // it's only a save of like 1kb of data.
 
-            unsigned short start, end;
+            unsigned short start = NULL, end = NULL;
             bool contains(unsigned short _n) {
                 return (_n >= start && _n <= end);
             }
@@ -267,11 +267,16 @@ namespace methods {
                         ranges.erase(ranges.begin() + f);
                         return;
                     }
-                    // TODO: Check if we're removing from the very start / end of a range
-                    sup f_s = { og.start, _n - 1 };
-                    sup s_s = { _n + 1, og.end };
-                    ranges.at(f) = f_s; // just change the original to be the new first half
-                    ranges.insert(ranges.begin() + f, s_s); // add the second half after
+                    sup f_s, s_s;
+                    if (og.end > _n)    // check if were splitting the range at the end, if so then don't create the second half
+                        s_s = { _n + 1, og.end };
+                    if (og.start < _n)  // same as above but for start
+                        f_s = { og.start, _n - 1 };
+                    if (f_s.start != NULL)
+                        ranges.at(f) = f_s; // just change the original to be the new first half
+                    else ranges.erase(ranges.begin() + f);
+                    if (s_s.start != NULL)
+                        ranges.insert(ranges.begin() + f, s_s); // add the second half after
                 }   // if the number is already excluded, don't bother
             }
         };
