@@ -213,26 +213,68 @@ namespace methods {
         }
     };
 
-    struct range_col {
-        void in();
-    };
+    namespace range {
+        struct sup {
+            // ideally, this should be stored as 11-bit ints.
+            // since fucking no one (except maybe akira kurisu) is going to use over 2000 colors.
+            // i'm too lazy to figure out how to properly work with 11-bit ints in c++ though, so let's just not bother.
+            // it's only a save of like 1kb of data.
 
-    struct range_super {
-        // stored as 11-bit ints.
-        // since fucking no one (except maybe akira kurisu) is going to use over 2000 colors.
-        // i'm too lazy to figure out how to store 11-bit ints in c++ though, so let's just not bother.
+            unsigned short start, end;
+            bool contains(unsigned short _n) {
+                return (_n >= start && _n <= end);
+            }
+            unsigned short biggersmaller(unsigned short _n) {
+                bool t = _n >= start, t2 = _n <= end;
+                if (t && t2) return GDIT_RANGE_FOUND;
+                if (t) return GDIT_RANGE_BIGGER;    // if it's larger than start and not in range it has to be bigger
+                return GDIT_RANGE_SMALLER;
+            }
+        };
 
-        unsigned short start, end;
-        range_col excluded;
-        bool contains(unsigned short _n) {
-            return (_n >= start && _n <= end) && (excluded.contains());
-        }
-    };
-
-    struct range_col {
-        void in() {
-            
-        }
+        struct super {
+            std::vector<sup> ranges = {};
+            super(int _s, int _e) {
+                ranges.push_back({ _s, _e });
+            }
+            bool rec_check(unsigned short _r, unsigned short _n, bool* _f) {
+                unsigned short r = ranges[_r].biggersmaller(_n);    // check where the number is relative to the range
+                if (r == GDIT_RANGE_FOUND) return (*_f = true);     // if number is in range, set found and stop recursion
+                if (_r / 2 == _r && _r + (_r / 2) == _r) return false;  // if trying to check same range again, we know it's not in
+                if (r == GDIT_RANGE_BIGGER) rec_check(_r + (_r / 2), _n, _f);   // if number is bigger, check halfway range from right side
+                rec_check(_r / 2, _n, _f);                                      // if number is smaller, check halfway range from left side
+                return false; // the reason this function is bool instead of void is to make the assigment and return when found one-line
+            }
+            bool contains(unsigned short _n, bool _use_wacky_binary_search = false, unsigned short* _where_found = NULL) {
+                if (!_use_wacky_binary_search) {    // not sure if the binary search thing works so i'll just use this for now
+                    int ix = 0;
+                    for (sup rang : ranges)
+                        if (rang.contains(_n)) {
+                            if (_where_found != NULL) *_where_found = ix;
+                            return true;
+                        } else ix++;
+                    return false;
+                }
+                bool found = false;
+                rec_check(ranges.size() / 2, _n, &found);   // check the middle range
+                return found;
+            }
+            void exclude(unsigned short _n) {
+                unsigned short f;
+                if (this->contains(_n, false, &f)) {
+                    sup og = ranges[f];
+                    if (og.start == og.end) {
+                        ranges.erase(ranges.begin() + f);
+                        return;
+                    }
+                    // TODO: Check if we're removing from the very start / end of a range
+                    sup f_s = { og.start, _n - 1 };
+                    sup s_s = { _n + 1, og.end };
+                    ranges.at(f) = f_s; // just change the original to be the new first half
+                    ranges.insert(ranges.begin() + f, s_s); // add the second half after
+                }   // if the number is already excluded, don't bother
+            }
+        };
     }
 }
 

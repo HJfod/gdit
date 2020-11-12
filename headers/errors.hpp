@@ -14,6 +14,10 @@
 #define GDIT_SUCCESS                        50
 #define GDIT_PART_WORK_LEVEL_NOT_FOUND      55
 
+#define GDIT_RANGE_SMALLER                  80
+#define GDIT_RANGE_BIGGER                   81
+#define GDIT_RANGE_FOUND                    82
+
 #define GDIT_TYPE_PART                      100
 #define GDIT_TYPE_GDIT                      101
 #define GDIT_NULL                           418
