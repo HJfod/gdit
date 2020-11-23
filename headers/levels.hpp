@@ -571,7 +571,7 @@ namespace gdit {
         // TESTING!!!!!!!!
         // TEST THIS
 
-        methods::range forbidden_colors = { 1000, 1012 };
+        methods::range forbidden_colors = { 1000, 1012 };   // ignore bg, line, etc.
         for (nlohmann::json s_c : j["start_color"])
             if (!forbidden_colors.contains(s_c["id"]))
                 if (available_colors.contains(s_c))
