@@ -580,9 +580,12 @@ namespace gdit {
         for (std::string obj : j["removed"])
             base_data = methods::remove(base_data, obj + ";", false);
         
+        std::vector<int> add_colors = {};
+        
         std::string add = "";
-        for (std::string obj : j["added"])
+        for (std::string obj : j["added"]) {
             add += methods::sanitize(obj) + ";";
+        }
         base_data += add;
 
         //methods::fsave(dir + "\\" + name + ".master." + ext::leveldata, base_data);
